@@ -24,7 +24,7 @@ export const App = ({ vitraux }) => {
       </div>
 
       <Canvas shadows dpr={[1, 1.5]} camera={{ fov: 70, position: [0, 2, 15] }}>
-        <ambientLight intensity={0.015} />
+        {/* <ambientLight intensity={0.015} /> */}
         <color attach="background" args={['#191920']} />
         <fog attach="fog" args={['#191920', 0, 15 * 2]} />
         <group position={[0, -0.5, 0]}>
@@ -125,8 +125,8 @@ function Frames({ vitraux, q = new THREE.Quaternion(), p = new THREE.Vector3() }
       </group>
       {itemsRef.current[5] && (
         <EffectComposer disableNormalPass multisampling={0}>
-          {hovered < 6 && <GodRays ref={god} sun={itemsRef.current[hovered]} exposure={0.15} decay={0.8} blur />}
-          <Bloom luminanceThreshold={0} mipmapBlur luminanceSmoothing={0.0} intensity={1} />
+          {hovered < 6 && <GodRays ref={god} sun={itemsRef.current[hovered]} exposure={0.1} decay={0.8} blur />}
+          <Bloom luminanceThreshold={0} mipmapBlur luminanceSmoothing={0.0} intensity={0.3} />
         </EffectComposer>
       )}
     </>

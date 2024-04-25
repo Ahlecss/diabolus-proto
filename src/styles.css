@@ -39,9 +39,15 @@ body {
   position: absolute;
   transform: translate3d(-50%, -50%, 0);
   pointer-events: all;
+  opacity: 0;
+  animation: 1s appear 4s forwards;
 }
 .disappear {
   opacity: 0;
+  pointer-events: none;
+}
+
+.disappear > button {
   pointer-events: none;
 }
 
@@ -102,4 +108,13 @@ body {
 
 .radio_active {
   opacity: 1;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
