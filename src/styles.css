@@ -79,6 +79,7 @@ body {
 .cartel_active {
   transition: all 0.5s 1s;
   opacity: 1;
+  z-index: 10;
 }
 
 .cartel_title {
@@ -94,6 +95,11 @@ body {
   cursor: pointer;
   border: 1px solid white;
   padding: 10px 20px;
+  pointer-events: none;
+}
+
+.button_active {
+  pointer-events: all;
 }
 
 .radio {

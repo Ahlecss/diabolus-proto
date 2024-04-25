@@ -1,9 +1,10 @@
 import * as THREE from 'three'
-import { useEffect, useRef, useState, forwardRef, useCallback, Suspense } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { useCursor, MeshReflectorMaterial, Image, Text, Environment, Html, useTexture, useScroll, ScrollControls, Scroll, SpotLight, useDepthBuffer } from '@react-three/drei'
+import { useEffect, useRef, useState, forwardRef, useCallback, Suspense, memo } from 'react'
+import { Canvas, useFrame, useThree,extend } from '@react-three/fiber'
+import { useCursor, MeshReflectorMaterial, Image, Text, Environment, Html, useTexture, useScroll, ScrollControls, Scroll, SpotLight, useDepthBuffer, shaderMaterial } from '@react-three/drei'
 import { useRoute, useLocation } from 'wouter'
 import { easing } from 'maath'
+import { cubic } from 'maath/easing'
 import getUuid from 'uuid-by-string'
 import tunnel from 'tunnel-rat'
 import useSound from 'use-sound';
@@ -106,14 +107,14 @@ function Frames({ vitraux, q = new THREE.Quaternion(), p = new THREE.Vector3() }
     setHovered(index);
   }
 
-  const handleGodrays = useCallback(change, [hovered])
+  const handleGodrays = useCallback(change, [setHovered])
   useFrame((state, dt) => {
-    if (god.current) god.current.attributes = 0
     if (!active && data) data.el.scrollTop = lerp(data.el.scrollTop, 0, 0.1)
-    if (hovered != 1) exposure = lerp(exposure, 0.2, 0.1)
-    else exposure = lerp(exposure, 0, 0.1)
-    easing.damp3(state.camera.position, p, 0.4, dt)
-    easing.dampQ(state.camera.quaternion, q, 0.4, dt)
+    // Try to change exposure
+    // if (hovered != 1) exposure = lerp(exposure, 0.2, 0.1)
+    // else exposure = lerp(exposure, 0, 0.1)
+    easing.damp3(state.camera.position, p, cubic.inOut(0.6), dt)
+    easing.dampQ(state.camera.quaternion, q, cubic.inOut(0.6), dt)
   })
   return (
     <>
@@ -123,7 +124,7 @@ function Frames({ vitraux, q = new THREE.Quaternion(), p = new THREE.Vector3() }
         onPointerMissed={() => setLocation('/')}>
         {vitraux.map((props, i) => <Frame key={props.url} i={i} handleGodrays={handleGodrays} {...props} ref={itemsRef} /> /* prettier-ignore */)}
       </group>
-      {itemsRef.current[5] && (
+      {itemsRef.current[0] && (
         <EffectComposer disableNormalPass multisampling={0}>
           {hovered < 6 && <GodRays ref={god} sun={itemsRef.current[hovered]} exposure={0.1} decay={0.8} blur />}
           <Bloom luminanceThreshold={0} mipmapBlur luminanceSmoothing={0.0} intensity={0.3} />
@@ -134,17 +135,47 @@ function Frames({ vitraux, q = new THREE.Quaternion(), p = new THREE.Vector3() }
   )
 }
 
-const Frame = forwardRef((props, itemsRef) => {
-  const { url, music, texture, i, idd } = props
+export const ImageFadeMaterial = shaderMaterial(
+  {
+    tex1: undefined,
+    tex2: undefined,
+    opac: 0
+  },
+  ` varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+    }`,
+  ` varying vec2 vUv;
+    uniform sampler2D tex1;
+    uniform sampler2D tex2;
+    uniform float opac;
+    void main() {
+      vec2 uv = vUv;
+      vec4 _texture = texture2D(tex1, uv);
+      vec4 _texture2 = texture2D(tex2, uv);
+      vec4 finalTexture = mix(_texture, _texture2, opac);
+      gl_FragColor = finalTexture;
+      #include <tonemapping_fragment>
+      #include <encodings_fragment>
+    }`
+)
+
+extend({ ImageFadeMaterial })
+
+const Frame = memo(forwardRef((props, itemsRef) => {
+  const { url, music, texture1, texture2, i, idd } = props
   const vitrail = useRef()
   // const frame = useRef()
   const vec = new THREE.Vector3()
   const c = new THREE.Color()
   const [, params] = useRoute('/item/:id')
-  const [hovered, hover] = useState(false)
+  const shaderRef = useRef()
+  const hovered = useRef(false)
   // const [invisible, setInvisible] = useState(false)
   const invisible = useRef(false)
-  const [isPlaying, setIsPlaying] = useState(false);
+  // const [isPlaying, setIsPlaying] = useState(false);
+  const isPlaying = useRef(false)
   const [rnd] = useState(() => Math.random())
   const name = getUuid(url)
   const isActive = params?.id === name
@@ -154,40 +185,29 @@ const Frame = forwardRef((props, itemsRef) => {
   const viewport = useThree((state) => state.viewport)
   const depthBuffer = useDepthBuffer();
 
-  const tex = useTexture(texture)
+  const [tex1, tex2] = useTexture([texture1, texture2])
   const handleHover = (s, h) => {
-    hover(h)
+    hovered.current = (h)
     props.handleGodrays(h, i)
-    if (!isPlaying && (h || isActive)) {
-      setIsPlaying(true)
-      if(s)s.fade(0, 1, 1000)
+    if (!isPlaying.current && (h || isActive)) {
+      isPlaying.current = (true)
+      if (s) s.fade(0, 1, 1000)
       play()
     } else if ((!h && !isActive)) {
-      if(s)s.fade(1, 0, 250)
-      setIsPlaying(false)
+      if (s) s.fade(1, 0, 250)
+      isPlaying.current = (false)
       setTimeout(() => { stop() }, 250)
     }
   }
 
   console.log('rerender')
 
-  useCursor(hovered)
+  useCursor(hovered.current)
   useFrame((state, dt) => {
-
-    // console.log(itemsRef.current[i])
-
-    // light.current.target.position.lerp(vec.set((state.mouse.x * viewport.width) / 2, (state.mouse.y * viewport.height) / 2, 0), 0.1)
-    // light.current.target.updateMatrixWorld()
-    if (idd % 2 === 0) {
-      // vitrail.current.needsUpdate = true
-      easing.damp(vitrail.current.children[0].material, 'opacity', invisible.current ? 0 : 1, 0.1, dt)
-    }
-    // vitrail.current.material.zoom = 2 + Math.sin(rnd * 10000 + state.clock.elapsedTime / 3) / 2
-
-    // if (props.idd % 2 !== 0) {
-    easing.damp3(vitrail.current.children[0].scale, (!isActive && hovered ? 1.1 : 1), 0.1, dt)
-    // }
-    // easing.dampC(frame.current.material.color, hovered ? '#D31D1C' : 'white', 0.1, dt)
+    // console.log(idd, invisible.current)
+    // console.log(vitrail.current.children[0])
+    easing.damp(shaderRef.current, 'opac', invisible.current ? 1 : 0, cubic.inOut(0.4), dt)
+    easing.damp3(vitrail.current.children[0].scale, (!isActive && hovered.current ? 1.1 : 1), cubic.inOut(0.4), dt)
   })
   return (
     <group {...props}>
@@ -207,7 +227,7 @@ const Frame = forwardRef((props, itemsRef) => {
             onPointerOver={(e) => (e.stopPropagation(), handleHover(sound, true))}
             onPointerOut={() => (handleHover(sound, false))}>
             <planeBufferGeometry attach="geometry" args={[3.1 * 1.3, 10 * 1.3]} />
-            <meshBasicMaterial attach="material" map={tex} transparent={true} colorSpace={THREE.SRGBColorSpace} />
+            <imageFadeMaterial ref={shaderRef} attach="material" tex1={tex1} tex2={tex2} transparent={true} colorSpace={THREE.SRGBColorSpace} />
           </mesh>
         </group>
 
@@ -217,7 +237,7 @@ const Frame = forwardRef((props, itemsRef) => {
         <div className={`cartel_wrapper ${isActive ? 'cartel_active' : ''}`}>
           <h1 className='cartel_title'>{props.genre}</h1>
           <p className='cartel_description'>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-          <buttton className='cartel_button' onClick={(e) => (e.stopPropagation(), invisible.current = !invisible.current, handleHover(sound, true))}>Discover references</buttton>
+          <buttton className={`cartel_button ${isActive ? 'button_active' : ''}`} onClick={(e) => (e.stopPropagation(), invisible.current = !invisible.current)}>Discover references</buttton>
         </div>
         {/* <p className={`radio ${(hovered || isActive) ? 'radio_active' : ''}`}>Now playing {props.genre}</p> */}
       </ui.In>
@@ -226,4 +246,4 @@ const Frame = forwardRef((props, itemsRef) => {
       </Text> */}
     </group>
   )
-})
+}))
