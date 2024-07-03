@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { useEffect, useRef, useState, forwardRef, useCallback, Suspense, memo } from 'react'
 import { Canvas, useFrame, useThree, extend } from '@react-three/fiber'
-import { useCursor, MeshReflectorMaterial, Image, Text, Environment, Html, useTexture, useScroll, ScrollControls, Scroll, SpotLight, useDepthBuffer, shaderMaterial } from '@react-three/drei'
+import { useCursor, MeshReflectorMaterial, Image, Text, Environment, Html, useTexture, useScroll, ScrollControls, Scroll, SpotLight, useDepthBuffer, shaderMaterial, ContactShadows, OrbitControls } from '@react-three/drei'
 import { useRoute, useLocation } from 'wouter'
 import { easing } from 'maath'
 import { cubic } from 'maath/easing'
@@ -10,8 +10,7 @@ import tunnel from 'tunnel-rat'
 import useSound from 'use-sound';
 
 import { lerp } from './utils.js'
-import { EffectComposer, GodRays, Bloom } from '@react-three/postprocessing'
-import { log } from 'three/examples/jsm/nodes/Nodes.js'
+import { EffectComposer, GodRays, Bloom, SSR } from '@react-three/postprocessing'
 
 const GOLDENRATIO = 1.61803398875
 const ui = tunnel()
@@ -27,8 +26,14 @@ export const App = ({ vitraux }) => {
 
       <Canvas shadows dpr={[1, 1.5]} camera={{ fov: 70, position: [0, 2, 15] }}>
         {/* <ambientLight intensity={0.015} /> */}
-        <color attach="background" args={['#191920']} />
+        {/* <color attach="background" args={['#191920']} /> */}
         <fog attach="fog" args={['#191920', 0, 15 * 2]} />
+        <color attach="background" args={['#15151a']} />
+        {/* <OrbitControls enablePan={false} enableZoom={false} minPolarAngle={Math.PI / 2.2} maxPolarAngle={Math.PI / 2.2} /> */}
+
+        {/* <hemisphereLight intensity={0.5} /> */}
+        {/* <ContactShadows resolution={1024} frames={1} position={[0, -7, 0]} scale={15} blur={0.5} opacity={1} far={20} /> */}
+
         <group position={[0, -0.5, 0]}>
           <ScrollControls pages={1.45} damping={0.1}>
             <ScrollWrapper vitraux={vitraux} />
@@ -50,10 +55,10 @@ export const App = ({ vitraux }) => {
       </mesh> */}
         </group>
         <Environment preset="city" />
-        <mesh receiveShadow position={[0, -10, 0]} rotation-x={-Math.PI / 2}>
+        {/* <mesh receiveShadow position={[0, -10, 0]} rotation-x={-Math.PI / 2}>
           <planeGeometry args={[50, 50]} />
           <meshPhongMaterial />
-        </mesh>
+        </mesh> */}
       </Canvas>
     </>
   )
@@ -137,6 +142,7 @@ function Frames({ vitraux, q = new THREE.Quaternion(), p = new THREE.Vector3() }
         <EffectComposer disableNormalPass multisampling={0}>
           {hovered < 6 && <GodRays ref={god} sun={itemsRef.current[hovered]} density={0.4} weight={0.4} exposure={0.4} decay={0.8} blur />}
           <Bloom luminanceThreshold={0} mipmapBlur luminanceSmoothing={0.0} intensity={0.3} />
+          {/* <SSR /> */}
         </EffectComposer>
       )}
     </>
@@ -331,8 +337,8 @@ const Frame = memo(forwardRef((props, itemsRef) => {
   useFrame((state, dt) => {
     // console.log(idd, invisible.current)
     // console.log(vitrail.current.children[0])
-  shaderRef.current.uniforms.time.value += 1
-  console;log(shaderRef.current)
+    shaderRef.current.uniforms.time.value += 1
+    console.log(shaderRef.current)
     easing.damp(shaderRef.current, 'opac', invisible.current ? 1 : 0, cubic.inOut(0.4), dt)
     easing.damp3(vitrail.current.children[0].scale, (!isActive && hovered.current ? 1.1 : 1), cubic.inOut(0.4), dt)
   })
