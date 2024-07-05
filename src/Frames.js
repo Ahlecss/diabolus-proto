@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRoute, useLocation } from 'wouter'
 import { Quaternion, Vector3 } from "three"
-import { cubic } from 'maath/easing'
+import { cubic, quint, circ, quart, expo } from 'maath/easing'
 import { easing } from 'maath'
 
 import { EffectComposer, GodRays, Bloom, SSR } from '@react-three/postprocessing'
@@ -10,6 +10,7 @@ import { useFrame } from '@react-three/fiber'
 
 import { Frame } from "./Frame"
 import { lerp } from './utils.js'
+import { useFramesStore } from './store.js'
 
 export function Frames({ vitraux, q = new Quaternion(), p = new Vector3() }) {
   const ref = useRef([])
@@ -22,6 +23,12 @@ export function Frames({ vitraux, q = new Quaternion(), p = new Vector3() }) {
   const data = useScroll()
   let active = false;
   const [expo, setExpo] = useState(0);
+
+  // const {
+  //   changeHoverId,
+  //   changeFocusId,
+  // } = useFramesStore((s) => s);
+
   useEffect(() => {
     console.log('useEffect')
     const a = data.range(0, 1)
@@ -29,7 +36,7 @@ export function Frames({ vitraux, q = new Quaternion(), p = new Vector3() }) {
     console.log(clicked.current)
     if (clicked.current) {
       clicked.current.parent.updateWorldMatrix(true, true)
-      clicked.current.parent.localToWorld(p.set(1.5, 5, 3.25))
+      clicked.current.parent.localToWorld(p.set(0, 5, 2))
       clicked.current.parent.getWorldQuaternion(q)
       active = true;
     } else {
@@ -47,7 +54,10 @@ export function Frames({ vitraux, q = new Quaternion(), p = new Vector3() }) {
   useFrame((state, dt) => {
     if (!active && data) data.el.scrollTop = lerp(data.el.scrollTop, 0, 0.1)
 
-    if (god.current && god.current.blendMode) {
+    if (god.current && god.current.blendMode && clicked.current) {
+      god.current.blendMode.opacity.value = lerp(god.current.blendMode.opacity.value, 0.1, cubic.inOut(0.7))
+    }
+    else if (god.current && god.current.blendMode) {
       god.current.blendMode.opacity.value = lerp(god.current.blendMode.opacity.value, Math.abs(Math.sin(state.clock.elapsedTime)), cubic.inOut(0.7))
       // console.log(god.current.blendMode.opacity.value)
       // if (hovered) easing.damp(god.current.blendMode.opacity, 'value', 1, cubic.inOut(0.6), dt)
@@ -56,15 +66,16 @@ export function Frames({ vitraux, q = new Quaternion(), p = new Vector3() }) {
     // Try to change exposure
     // if (hovered != 1) exposure = lerp(exposure, 0.2, 0.1)
     // else exposure = lerp(exposure, 0, 0.1)
-    easing.damp3(state.camera.position, p, cubic.inOut(0.6), dt)
-    easing.dampQ(state.camera.quaternion, q, cubic.inOut(0.6), dt)
+    easing.damp3(state.camera.position, p, circ.inOut(0.8), dt)
+    easing.dampQ(state.camera.quaternion, q, circ.inOut(0.6), dt)
   })
   return (
     <>
       <group
         ref={ref}
         onClick={(e) => (e.stopPropagation(), setLocation(clicked.current === e.object ? '/' : '/item/' + e.object.name))}
-        onPointerMissed={() => setLocation('/')}>
+        // Add changeHoverId(false), or setHovered(undefined)
+        onPointerMissed={() => (setLocation('/'), setHovered(undefined))}>
         {vitraux.map((props, i) => <Frame key={props.url} i={i} handleGodrays={handleGodrays} {...props} ref={itemsRef} /> /* prettier-ignore */)}
       </group>
       {itemsRef.current[0] && (

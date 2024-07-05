@@ -1,16 +1,39 @@
+import { useEffect, useState } from "react";
 import { SoundManager } from "./SoundManager";
 import { useFramesStore } from "./store";
+import { vitrauxData } from "./vitrauxData";
 
 export const Overlay = () => {
     const {
         hoverId,
         focusId,
+        invisible,
+        setInvisible
     } = useFramesStore((s) => s);
 
+    const [isActive, setIsActive] = useState(false);
+
+    useEffect(() => {
+        console.log(hoverId, focusId)
+        if (hoverId !== null) {
+            console.log(hoverId)
+            setIsActive(hoverId)
+        }
+        else if (focusId !== null) {
+            console.log(focusId)
+            setIsActive(focusId)
+        }
+        else setIsActive(undefined)
+    }, [hoverId, focusId])
     return (
         <>
-            <div className="radio_wrapper">
-                <p>Now playing {hoverId}</p>
+            <div className={`radio_wrapper`}>
+                {vitrauxData[isActive] &&
+                    <p>Now playing {vitrauxData[isActive]?.musicTitle}</p>
+                }
+            </div>
+            <div className={`cartel_wrapper ${focusId !== null ? 'cartel_active' : ''}`}>
+                <button className={`cartel_button ${focusId !== null ? 'button_active' : ''} ${invisible ? 'button_focus' : ''} `} onClick={(e) => (e.stopPropagation(), console.log('tets'), setInvisible(!invisible))}>Discover references</button>
             </div>
             <SoundManager />
         </>
