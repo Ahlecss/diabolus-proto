@@ -42,12 +42,13 @@ body {
   opacity: 0;
   animation: 1s appear 4s forwards;
 }
+
 .disappear {
   opacity: 0;
   pointer-events: none;
 }
 
-.disappear > button {
+.disappear>button {
   pointer-events: none;
 }
 
@@ -66,6 +67,14 @@ body {
   top: 100px;
 }
 
+.radio_wrapper {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1;
+}
+
+/*
 .cartel_wrapper {
   max-width: 33vw;
   opacity: 0;
@@ -97,6 +106,7 @@ body {
   padding: 10px 20px;
   pointer-events: none;
 }
+  */
 
 .button_active {
   pointer-events: all;
@@ -120,6 +130,7 @@ body {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
