@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Environment, ScrollControls, useAspect, useScroll } from '@react-three/drei'
 
 import { Overlay } from './Overlay.js'
@@ -10,6 +10,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { useFramesStore } from './store.js'
 import { memo } from 'react'
 import { useEffect } from 'react'
+import { useGesture } from '@use-gesture/react'
 
 const GOLDENRATIO = 1.61803398875
 
@@ -31,6 +32,7 @@ export const App = ({ vitraux }) => {
 
         <group position={[0, -0.5, 0]}>
           {/* <ScrollControls infinite pages={1.45} damping={0.1}> */}
+          {/* <ScrollControls enabled={focusId !== null} pages={focusId === null ? 0 : 1.45} damping={0.1}> */}
           <ScrollWrap vitraux={vitraux} />
         </group>
         <Environment preset="city" />
@@ -68,12 +70,6 @@ function ScrollWrap({ vitraux }) {
 
   )
 }
-
-const ScrollRotation = memo(({ groupRef }) => {
-  // const scroll = useScroll()
-
-  // console.log(scroll.offset)
-})
 const ScrollVertical = ({ groupRef }) => {
   // const scroll = useScroll()
 
@@ -85,11 +81,20 @@ const ScrollVertical = ({ groupRef }) => {
 const ScrollWrapper = memo(({ vitraux }) => {
   const size = useAspect(1800, 1000)
 
+  const camera = useThree((state) => state.camera)
+
   const groupRef = useRef()
 
   const { focusId } = useFramesStore(
     useShallow((state) => ({ focusId: state.focusId })),
   )
+
+  const bind = useGesture({
+    onDrag: ({ offset: [x, y] }) => { if (focusId !== null) { console.log(x, y), camera.position.x = (x / 100), camera.position.y = y / 100 } },
+    // onDragStart: () => { console.log(isDragging); setTimeout(() => isDragging = true, 100) },
+    // onDragEnd: () => { console.log(isDragging); setTimeout(() => isDragging = false, 100) },
+    // onHover: ({ hovering }) => set({ scale: hovering ? [1.2, 1.2, 1.2] : [1, 1, 1] })
+  })
 
   var dtScroll = useRef(0);
 
@@ -98,19 +103,12 @@ const ScrollWrapper = memo(({ vitraux }) => {
     dtScroll.current += e.deltaY / 10000
     console.log(dtScroll.current);
   }
-  const onScroll = (e) => {
-    // console.log(e);
-    // dtScroll.current += e.deltaY / 10000
-    // console.log(dtScroll.current);
-  }
 
   useEffect(() => {
     if (focusId === null) {
       document.addEventListener('wheel', onRotate)
-      document.removeEventListener('wheel', onScroll)
     } else {
       document.removeEventListener('wheel', onRotate)
-      document.addEventListener('wheel', onScroll)
     }
     return () => {
       document.removeEventListener('wheel', onRotate)
@@ -123,7 +121,7 @@ const ScrollWrapper = memo(({ vitraux }) => {
   })
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} {...bind()}>
       <Frames vitraux={vitraux} />
       {/* <mesh scale={size} position={[0, 0, -10]}>
         <Sphere>
@@ -133,7 +131,6 @@ const ScrollWrapper = memo(({ vitraux }) => {
         </Sphere>
       </mesh> */}
       {/* {focusId && <ScrollVertical groupRef={groupRef} />} */}
-      {focusId === null && <ScrollRotation groupRef={groupRef} />}
     </group>
 
   )
