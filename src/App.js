@@ -6,11 +6,16 @@ import { Overlay } from './Overlay.js'
 import { Frames } from './Frames.js'
 import { easing } from 'maath'
 import { cubic } from 'maath/easing'
+import { useShallow } from 'zustand/react/shallow'
+import { useFramesStore } from './store.js'
+import { memo } from 'react'
+import { useEffect } from 'react'
 
 const GOLDENRATIO = 1.61803398875
 
 
 export const App = ({ vitraux }) => {
+
   return (
     <>
       <Overlay />
@@ -26,9 +31,7 @@ export const App = ({ vitraux }) => {
 
         <group position={[0, -0.5, 0]}>
           {/* <ScrollControls infinite pages={1.45} damping={0.1}> */}
-          <ScrollControls infinite pages={15} damping={0.1}>
-            <ScrollWrapper vitraux={vitraux} />
-          </ScrollControls>
+          <ScrollWrap vitraux={vitraux} />
         </group>
         <Environment preset="city" />
         {/* <mesh receiveShadow position={[0, -10, 0]} rotation-x={-Math.PI / 2}>
@@ -51,19 +54,72 @@ function Loader() {
     </div>
   )
 }
-function ScrollWrapper({ vitraux }) {
+
+function ScrollWrap({ vitraux }) {
+
+  const { focusId } = useFramesStore(
+    useShallow((state) => ({ focusId: state.focusId })),
+  )
+
+  return (
+    // <ScrollControls infinite={focusId === null ? true : false} pages={focusId === null ? 15 : 1.45} damping={0.2}>
+    <ScrollWrapper vitraux={vitraux} />
+    // </ScrollControls>
+
+  )
+}
+
+const ScrollRotation = memo(({ groupRef }) => {
+  // const scroll = useScroll()
+
+  // console.log(scroll.offset)
+})
+const ScrollVertical = ({ groupRef }) => {
+  // const scroll = useScroll()
+
+  useFrame((state, dt) => {
+    // easing.dampE(groupRef.current.rotation, [0, state.clock.elapsedTime / 10, 0], cubic.inOut(0), dt)
+    easing.damp3(groupRef.current.position, [0, scroll.offset * 10.5, 0], cubic.inOut(0), dt)
+  })
+}
+const ScrollWrapper = memo(({ vitraux }) => {
   const size = useAspect(1800, 1000)
 
   const groupRef = useRef()
-  const scroll = useScroll()
+
+  const { focusId } = useFramesStore(
+    useShallow((state) => ({ focusId: state.focusId })),
+  )
+
+  var dtScroll = useRef(0);
+
+  const onRotate = (e) => {
+    console.log(e);
+    dtScroll.current += e.deltaY / 10000
+    console.log(dtScroll.current);
+  }
+  const onScroll = (e) => {
+    // console.log(e);
+    // dtScroll.current += e.deltaY / 10000
+    // console.log(dtScroll.current);
+  }
+
+  useEffect(() => {
+    if (focusId === null) {
+      document.addEventListener('wheel', onRotate)
+      document.removeEventListener('wheel', onScroll)
+    } else {
+      document.removeEventListener('wheel', onRotate)
+      document.addEventListener('wheel', onScroll)
+    }
+    return () => {
+      document.removeEventListener('wheel', onRotate)
+    }
+  })
 
   useFrame((state, dt) => {
-    // console.log()
-
-    // groupRef.current.rotation.y += scroll.__damp?.velocity_offset
-    easing.dampE(groupRef.current.rotation, [0, state.clock.elapsedTime / 10, 0], cubic.inOut(0), dt)
-    // easing.dampE(groupRef.current.rotation, [0, Math.PI * 2 * scroll.offset, 0], cubic.inOut(0), dt)
-
+    // console.log(scroll.offset)
+    easing.dampE(groupRef.current.rotation, [0, Math.PI * 2 * dtScroll.current, 0], cubic.inOut(0.4), dt)
   })
 
   return (
@@ -76,9 +132,12 @@ function ScrollWrapper({ vitraux }) {
           </Suspense>
         </Sphere>
       </mesh> */}
+      {/* {focusId && <ScrollVertical groupRef={groupRef} />} */}
+      {focusId === null && <ScrollRotation groupRef={groupRef} />}
     </group>
+
   )
-}
+})
 
 // function VideoMaterial({ url }) {
 //   const texture = useVideoTexture(url)
