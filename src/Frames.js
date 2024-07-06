@@ -51,8 +51,13 @@ export function Frames({ vitraux, q = new Quaternion(), p = new Vector3() }) {
   }
 
   const handleGodrays = useCallback(change, [setHovered])
+
+  useEffect(() => {
+    console.log(ref.current)
+  }, [])
   useFrame((state, dt) => {
-    if (!active && data) data.el.scrollTop = lerp(data.el.scrollTop, 0, 0.1)
+    // ref.current.rotation.y += 0.01
+    // if (!active && data) data.el.scrollTop = lerp(data.el.scrollTop, 0, 0.1)
 
     if (god.current && god.current.blendMode && clicked.current) {
       god.current.blendMode.opacity.value = lerp(god.current.blendMode.opacity.value, 0.1, cubic.inOut(0.7))
@@ -66,6 +71,8 @@ export function Frames({ vitraux, q = new Quaternion(), p = new Vector3() }) {
     // Try to change exposure
     // if (hovered != 1) exposure = lerp(exposure, 0.2, 0.1)
     // else exposure = lerp(exposure, 0, 0.1)
+    console.log(state.clock.elapsedTime)
+
     easing.damp3(state.camera.position, p, circ.inOut(0.8), dt)
     easing.dampQ(state.camera.quaternion, q, circ.inOut(0.6), dt)
   })
@@ -76,7 +83,7 @@ export function Frames({ vitraux, q = new Quaternion(), p = new Vector3() }) {
         onClick={(e) => (e.stopPropagation(), setLocation(clicked.current === e.object ? '/' : '/item/' + e.object.name))}
         // Add changeHoverId(false), or setHovered(undefined)
         onPointerMissed={() => (setLocation('/'), setHovered(undefined))}>
-        {vitraux.map((props, i) => <Frame key={props.url} i={i} handleGodrays={handleGodrays} {...props} ref={itemsRef} /> /* prettier-ignore */)}
+        {vitraux.map((props, i) => <Frame key={i} i={i} handleGodrays={handleGodrays} {...props} length={vitraux.length} ref={itemsRef} /> /* prettier-ignore */)}
       </group>
       {itemsRef.current[0] && (
         <EffectComposer disableNormalPass multisampling={0}>

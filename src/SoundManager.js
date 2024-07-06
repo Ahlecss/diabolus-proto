@@ -7,16 +7,17 @@ import { forwardRef } from 'react';
 import { useImperativeHandle } from 'react';
 import { useFramesStore } from './store';
 import { isMobile } from 'react-device-detect';
+import { useShallow } from 'zustand/react/shallow';
 export const SoundManager = memo(() => {
 
     const soundsRef = useRef([]);
     const oldId = useRef();
 
-    const {
-        hoverId,
-        focusId,
-        changeFocusId
-    } = useFramesStore((s) => s);
+    const { hoverId, focusId, changeFocusId } = useFramesStore(
+        useShallow((state) => ({ hoverId: state.hoverId, focusId: state.focusId, changeFocusId: state.changeFocusId })),
+    )
+
+    console.log('rerender')
 
     const playSound = (newId) => {
         if (newId !== null && soundsRef.current[newId]?.sound) {

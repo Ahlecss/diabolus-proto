@@ -9,6 +9,7 @@ import { Cloud, Clouds, Float, Scroll, shaderMaterial, useCursor, useDepthBuffer
 import { extend, useFrame, useThree } from "@react-three/fiber"
 
 import { useFramesStore } from "./store"
+import { useShallow } from "zustand/react/shallow"
 
 const ImageFadeMaterial = shaderMaterial(
   {
@@ -66,13 +67,11 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
   const viewport = useThree((state) => state.viewport)
   const depthBuffer = useDepthBuffer();
 
-  const {
-    hoverId,
-    focusId,
-    changeHoverId,
-    changeFocusId,
-    invisible
-  } = useFramesStore((s) => s);
+  console.log('rerender')
+
+  const { changeHoverId, changeFocusId, invisible } = useFramesStore(
+    useShallow((state) => ({ changeHoverId: state.changeHoverId, changeFocusId: state.changeFocusId, invisible: state.invisible })),
+  )
 
   useEffect(() => {
     changeFocusId(isActive ? i : null)
@@ -104,51 +103,57 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
   })
   return (
     <group
-      position={[10 * Math.sin(2 * Math.PI * ((i + 1) / props.length)), 0, -8 + 10 * -Math.cos(2 * Math.PI * ((i + 1) / props.length))]}
-      rotation={[0, -2 * Math.PI * ((i + 1) / props.length), 0]}>
+      position={[
+        10 * Math.sin(2 * Math.PI * ((i + 1) / length)),
+        0,
+        0 + 10 * -Math.cos(2 * Math.PI * ((i + 1) / length))]}
+      rotation={[0,
+        -2 * Math.PI * ((i + 1) / length),
+        0]}>
       {/* <mesh ref={frame} raycast={() => null} scale={[0.9, 0.93, 0.9]} position={[0, 0, 0.2]}>
             <boxGeometry />
             <meshBasicMaterial toneMapped={false} fog={false} />
           </mesh> */}
-      <Scroll>
+      {/* <Scroll> */}
 
-        <group ref={vitrail} >
-          <mesh receiveShadow position={[0, 0, 0.1]}
-            ref={el => itemsRef.current[i] = el}
-            key={i}
-            trueId={i}
-            name={name}
-            transparent={true}
-            onPointerOver={(e) => pointerEvent(e, true)}
-            onPointerOut={(e) => pointerEvent(e, false)}
-          >
-            <planeBufferGeometry attach="geometry" args={[3.1 * 1.3, 10 * 1.3, 100, 100]} />
-            <imageFadeMaterial ref={shaderRef} attach="material" tex1={tex1} tex2={tex2} transparent={true} colorSpace={SRGBColorSpace} side={DoubleSide} />
-          </mesh>
+      <group ref={vitrail} >
+        <mesh receiveShadow position={[0, 0, 0/*.1*/]}
+          ref={el => itemsRef.current[i] = el}
+          key={i}
+          center={true}
+          trueId={i}
+          name={name}
+          transparent={true}
+          onPointerOver={(e) => pointerEvent(e, true)}
+          onPointerOut={(e) => pointerEvent(e, false)}
+        >
+          <planeBufferGeometry attach="geometry" args={[3.1 * 1.3, 10 * 1.3, 100, 100]} />
+          <imageFadeMaterial ref={shaderRef} attach="material" tex1={tex1} tex2={tex2} transparent={true} colorSpace={SRGBColorSpace} side={DoubleSide} />
+        </mesh>
 
-        </group>
-        {/* <Clouds material={MeshBasicMaterial}>
-          <Float
-            speed={1} // Animation speed, defaults to 1
-            rotationIntensity={3} // XYZ rotation intensity, defaults to 1
-            floatIntensity={1} // Up/down float intensity, works like a multiplier with floatingRange,defaults to 1
-            floatingRange={[-7, -8]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
-          >
-            <Cloud layers={0} ref={cloudRef} color={'#aaa'} bounds={[6, 5, 5]} concentrate="outside" seed={2} position={[0, 0, 0]} segments={10} volume={10} fade={10} growth={4} />
-          </Float>
-          <Float
-            speed={1} // Animation speed, defaults to 1
-            rotationIntensity={4} // XYZ rotation intensity, defaults to 1
-            floatIntensity={1} // Up/down float intensity, works like a multiplier with floatingRange,defaults to 1
-            floatingRange={[-6, -7]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
-          >
-            <Cloud layers={0} ref={cloudRef} color={'#aaa'} bounds={[6, 5, 5]} concentrate="outside" seed={3} position={[0, 0, 0]} segments={10} volume={10} fade={10} growth={4} />
-          </Float>
-        </Clouds> */}
+      </group>
+      <Clouds material={MeshBasicMaterial}>
+        <Float
+          speed={1} // Animation speed, defaults to 1
+          rotationIntensity={3} // XYZ rotation intensity, defaults to 1
+          floatIntensity={1} // Up/down float intensity, works like a multiplier with floatingRange,defaults to 1
+          floatingRange={[-7, -8]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
+        >
+          <Cloud layers={0} ref={cloudRef} color={'#aaa'} bounds={[6, 5, 5]} concentrate="outside" seed={2} position={[0, 0, 0]} segments={10} volume={10} fade={10} growth={4} opacity={Math.random()} />
+        </Float>
+        <Float
+          speed={1} // Animation speed, defaults to 1
+          rotationIntensity={4} // XYZ rotation intensity, defaults to 1
+          floatIntensity={1} // Up/down float intensity, works like a multiplier with floatingRange,defaults to 1
+          floatingRange={[-6, -7]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
+        >
+          <Cloud layers={0} ref={cloudRef} color={'#aaa'} bounds={[6, 5, 5]} concentrate="outside" seed={3} position={[0, 0, 0]} segments={10} volume={10} fade={10} growth={4} opacity={Math.random()} />
+        </Float>
+      </Clouds>
 
 
-        {/* <SpotLight castShadow ref={light} penumbra={0} distance={60} angle={3.5} attenuation={5} anglePower={4} intensity={2} color="red" position={[0, 5, 1.5]} depthBuffer={depthBuffer} /> */}
-      </Scroll>
+      {/* <SpotLight castShadow ref={light} penumbra={0} distance={60} angle={3.5} attenuation={5} anglePower={4} intensity={2} color="red" position={[0, 5, 1.5]} depthBuffer={depthBuffer} /> */}
+      {/* </Scroll> */}
     </group>
   )
 }))

@@ -1,9 +1,11 @@
 import { useRef } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { Environment, ScrollControls, useAspect } from '@react-three/drei'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { Environment, ScrollControls, useAspect, useScroll } from '@react-three/drei'
 
 import { Overlay } from './Overlay.js'
 import { Frames } from './Frames.js'
+import { easing } from 'maath'
+import { cubic } from 'maath/easing'
 
 const GOLDENRATIO = 1.61803398875
 
@@ -23,7 +25,8 @@ export const App = ({ vitraux }) => {
         {/* <ContactShadows resolution={1024} frames={1} position={[0, -7, 0]} scale={15} blur={0.5} opacity={1} far={20} /> */}
 
         <group position={[0, -0.5, 0]}>
-          <ScrollControls pages={1.45} damping={0.1}>
+          {/* <ScrollControls infinite pages={1.45} damping={0.1}> */}
+          <ScrollControls infinite pages={15} damping={0.1}>
             <ScrollWrapper vitraux={vitraux} />
           </ScrollControls>
         </group>
@@ -51,8 +54,20 @@ function Loader() {
 function ScrollWrapper({ vitraux }) {
   const size = useAspect(1800, 1000)
 
+  const groupRef = useRef()
+  const scroll = useScroll()
+
+  useFrame((state, dt) => {
+    // console.log()
+
+    // groupRef.current.rotation.y += scroll.__damp?.velocity_offset
+    easing.dampE(groupRef.current.rotation, [0, state.clock.elapsedTime / 10, 0], cubic.inOut(0), dt)
+    // easing.dampE(groupRef.current.rotation, [0, Math.PI * 2 * scroll.offset, 0], cubic.inOut(0), dt)
+
+  })
+
   return (
-    <>
+    <group ref={groupRef}>
       <Frames vitraux={vitraux} />
       {/* <mesh scale={size} position={[0, 0, -10]}>
         <Sphere>
@@ -61,7 +76,7 @@ function ScrollWrapper({ vitraux }) {
           </Suspense>
         </Sphere>
       </mesh> */}
-    </>
+    </group>
   )
 }
 

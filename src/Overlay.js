@@ -2,14 +2,13 @@ import { useEffect, useState } from "react";
 import { SoundManager } from "./SoundManager";
 import { useFramesStore } from "./store";
 import { vitrauxData } from "./vitrauxData";
+import { useShallow } from "zustand/react/shallow";
 
 export const Overlay = () => {
-    const {
-        hoverId,
-        focusId,
-        invisible,
-        setInvisible
-    } = useFramesStore((s) => s);
+
+    const { hoverId, focusId, invisible, setInvisible } = useFramesStore(
+        useShallow((state) => ({ hoverId: state.hoverId, focusId: state.focusId, invisible: state.invisible, setInvisible: state.setInvisible })),
+    )
 
     const [isActive, setIsActive] = useState(false);
 
