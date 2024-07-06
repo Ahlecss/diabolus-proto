@@ -10,7 +10,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { useFramesStore } from './store.js'
 import { memo } from 'react'
 import { useEffect } from 'react'
-import { useGesture } from '@use-gesture/react'
+import { useDrag, useGesture } from '@use-gesture/react'
 
 const GOLDENRATIO = 1.61803398875
 
@@ -59,13 +59,26 @@ function Loader() {
 
 function ScrollWrap({ vitraux }) {
 
-  const { focusId } = useFramesStore(
-    useShallow((state) => ({ focusId: state.focusId })),
-  )
+  const groupRef = useRef()
 
+  const camera = useThree((state) => state.camera)
+
+  const off = useRef({ x: 0, y: 0 })
+
+  // Find a way to avoid camera value shiet
+  const bind = useDrag(({ down, offset: [x, y] }) => { { off.current.x = (x / 100), off.current.y = y / 100 } }, { delay: 200 })
+
+  useFrame(() => {
+    camera.position.x = camera.position.x + off.current.x
+    camera.position.y = camera.position.y + off.current.y
+    off.current.x = 0
+    off.current.y = 0
+  })
   return (
     // <ScrollControls infinite={focusId === null ? true : false} pages={focusId === null ? 15 : 1.45} damping={0.2}>
-    <ScrollWrapper vitraux={vitraux} />
+    <group ref={groupRef} {...bind()}>
+      <ScrollWrapper vitraux={vitraux} />
+    </group>
     // </ScrollControls>
 
   )
@@ -78,23 +91,15 @@ const ScrollVertical = ({ groupRef }) => {
     easing.damp3(groupRef.current.position, [0, scroll.offset * 10.5, 0], cubic.inOut(0), dt)
   })
 }
-const ScrollWrapper = memo(({ vitraux }) => {
+const ScrollWrapper = ({ vitraux }) => {
   const size = useAspect(1800, 1000)
 
-  const camera = useThree((state) => state.camera)
 
   const groupRef = useRef()
 
   const { focusId } = useFramesStore(
     useShallow((state) => ({ focusId: state.focusId })),
   )
-
-  const bind = useGesture({
-    onDrag: ({ offset: [x, y] }) => { if (focusId !== null) { console.log(x, y), camera.position.x = (x / 100), camera.position.y = y / 100 } },
-    // onDragStart: () => { console.log(isDragging); setTimeout(() => isDragging = true, 100) },
-    // onDragEnd: () => { console.log(isDragging); setTimeout(() => isDragging = false, 100) },
-    // onHover: ({ hovering }) => set({ scale: hovering ? [1.2, 1.2, 1.2] : [1, 1, 1] })
-  })
 
   var dtScroll = useRef(0);
 
@@ -121,7 +126,7 @@ const ScrollWrapper = memo(({ vitraux }) => {
   })
 
   return (
-    <group ref={groupRef} {...bind()}>
+    <group ref={groupRef}>
       <Frames vitraux={vitraux} />
       {/* <mesh scale={size} position={[0, 0, -10]}>
         <Sphere>
@@ -134,7 +139,7 @@ const ScrollWrapper = memo(({ vitraux }) => {
     </group>
 
   )
-})
+}
 
 // function VideoMaterial({ url }) {
 //   const texture = useVideoTexture(url)

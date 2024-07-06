@@ -103,17 +103,15 @@ export function Frames({ vitraux, q = new Quaternion(), p = new Vector3() }) {
     // }
   }, [clicked])
 
-  const boundaries = [-100, 100, 100, -100]
+  // let xTo = gsap.quickTo(camera.position, 'x', { duration: 0, ease: "power3" });
+  // let yTo = gsap.quickTo(camera.position, 'y', { duration: 0, ease: "power3" });
 
-  let xTo = gsap.quickTo(camera.position, 'x', { duration: 0, ease: "power3" });
-  let yTo = gsap.quickTo(camera.position, 'y', { duration: 0, ease: "power3" });
   return (
     <>
       <group
         ref={ref}
         onClick={(e) => { if (isDragging) return; else (e.stopPropagation(), setLocation(clicked.current === e.object ? '/' : '/item/' + e.object.name)) }}
         // Add changeHoverId(false), or setHovered(undefined)
-        // {...bind()}
         onPointerMissed={() => (setLocation('/'), setHovered(undefined))}>
         {vitraux.map((props, i) => <Frame key={i} i={i} handleGodrays={handleGodrays} {...props} length={vitraux.length} ref={itemsRef} /> /* prettier-ignore */)}
       </group>
