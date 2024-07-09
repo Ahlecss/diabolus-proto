@@ -1,3 +1,4 @@
+import { useThree } from "@react-three/fiber"
 import { useEffect } from "react"
 
 export const Gyro = () => {
