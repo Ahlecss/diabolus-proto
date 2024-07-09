@@ -166,7 +166,7 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
     // else exposure = lerp(exposure, 0, 0.1)
     // easing.damp3(state.camera.position, p, circ.inOut(0.8), dt)
     if (clicked.current !== null) {
-      easing.dampQ(state.camera.quaternion, q, circ.inOut(0.6), dt)
+      // easing.dampQ(state.camera.quaternion, q, circ.inOut(0.6), dt)
     }
   })
 
