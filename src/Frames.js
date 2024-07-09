@@ -10,6 +10,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 
 import { Frame } from "./Frame"
 import { lerp } from './utils.js'
+import { isMobile } from 'react-device-detect'
 
 export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }) => {
   const ref = useRef([])
@@ -42,8 +43,8 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
     console.log('onMouseDown', clicked.current);
     if (!clicked.current) return
     canDrag = true;
-    startX = e.clientX / 100;
-    startY = e.clientY / 100;
+    startX = e.clientX / (isMobile ? 20 : 100);
+    startY = e.clientY / (isMobile ? 20 : 100);
   }
   const onMouseMove = (e) => {
     if (!canDrag) return
@@ -63,10 +64,10 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
   const onTouchMove = (e) => {
     if (!canDrag) return
     isDragging = true
-    offsetX = e.changedTouches[0].pageX / 100 - startX
-    offsetY = e.changedTouches[0].pageY / 100 - startY
-    startX = e.changedTouches[0].pageX / 100
-    startY = e.changedTouches[0].pageY / 100
+    offsetX = e.changedTouches[0].pageX / 20 - startX
+    offsetY = e.changedTouches[0].pageY / 20 - startY
+    startX = e.changedTouches[0].pageX / 20
+    startY = e.changedTouches[0].pageY / 20
     console.log('mousemove', e.client, startX);
 
     groupYTo(Math.max(0, Math.min(ref.current.position.y - offsetY, 10.5)))
