@@ -1,4 +1,5 @@
 import { useFrame, useThree } from "@react-three/fiber"
+import { easing } from "maath"
 import { useEffect } from "react"
 
 export const Gyro = () => {
@@ -14,7 +15,8 @@ export const Gyro = () => {
     }
 
     useFrame(() => {
-        camera.rotation.y = test
+        easing.damp3(camera.rotation, [0, test, 0], cubic.inOut(0.1), dt)
+
     })
 
 
