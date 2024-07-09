@@ -11,9 +11,9 @@ export const Gyro = () => {
     let previous = 0;
 
     const deviceMotion = (e) => {
-        console.log(e)
         test = +(e.alpha).toFixed(3)
-        if(test !== test) lla = (test * Math.PI) / 180
+        console.log(test)
+        if(test != test) lla = (test * Math.PI) / 180
     }
 
     useFrame((state, dt) => {
