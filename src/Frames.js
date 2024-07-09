@@ -53,7 +53,22 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
     offsetY = e.clientY / 100 - startY
     startX = e.clientX / 100
     startY = e.clientY / 100
-    console.log('mousemove', ref.current.position.x);
+    console.log('mousemove', e.client, startX);
+
+    groupYTo(Math.max(0, Math.min(ref.current.position.y - offsetY, 10.5)))
+    if (clicked.current.type === 'triple') {
+      groupXTo(Math.max(-3.5, Math.min(ref.current.position.x + offsetX * clicked.current.ratios.x, 4.5)))
+      groupZTo(Math.max(-3.5, Math.min(ref.current.position.z + (offsetX * clicked.current.ratios.z), 4.5)))
+    }
+  }
+  const onTouchMove = (e) => {
+    if (!canDrag) return
+    isDragging = true
+    offsetX = e.changedTouches[0].pageX / 100 - startX
+    offsetY = e.changedTouches[0].pageY / 100 - startY
+    startX = e.changedTouches[0].pageX / 100
+    startY = e.changedTouches[0].pageY / 100
+    console.log('mousemove', e.client, startX);
 
     groupYTo(Math.max(0, Math.min(ref.current.position.y - offsetY, 10.5)))
     if (clicked.current.type === 'triple') {
@@ -81,10 +96,12 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
 
   const addDragEvents = () => {
     document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('touchmove', onTouchMove)
     document.addEventListener('mouseup', onMouseUp2)
   }
   const removeDragEvents = () => {
     document.removeEventListener('mousemove', onMouseMove)
+    document.removeEventListener('touchmove', onTouchMove)
     document.removeEventListener('mouseup', onMouseUp2)
   }
 
