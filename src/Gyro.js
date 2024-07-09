@@ -15,7 +15,7 @@ export const Gyro = () => {
         console.log(camera.rotation.y)
     }
 
-    useFrame(() => {
+    useFrame((state, dt) => {
         easing.damp3(camera.rotation, [0, test, 0], cubic.inOut(0.1), dt)
 
     })
