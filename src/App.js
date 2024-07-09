@@ -129,7 +129,7 @@ const ScrollWrapper = ({ vitraux }) => {
 
   useFrame((state, dt) => {
     // console.log(scroll.offset)
-    easing.dampE(groupRef.current.rotation, [0, dtScroll.current, 0], cubic.inOut(0.4), dt)
+    // easing.dampE(groupRef.current.rotation, [0, dtScroll.current, 0], cubic.inOut(0.4), dt)
   })
 
   return (
