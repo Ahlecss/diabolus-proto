@@ -8,10 +8,14 @@ export const Gyro = () => {
 
     const deviceMotion = (e) => {
         console.log(e)
-        test = +(e.alpha / 360).toFixed(2)
-        camera.rotation.y = test
+        test = +(e.alpha / 360).toFixed(1)
+        // camera.rotation.y = test
         console.log(camera.rotation.y)
     }
+
+    useFrame(() => {
+        camera.rotation.y = test
+    })
 
 
     useEffect(() => {
