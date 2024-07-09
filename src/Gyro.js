@@ -15,7 +15,8 @@ export const Gyro = (isActive) => {
         // const beta = (e.beta * Math.PI) / 180;
         // const gamma = (e.gamma * Math.PI) / 180;
         const diff = alpha - previous
-        if (diff > 0.2 && diff < - 0.2) setQuat(alpha)
+        console.log(diff)
+        if (diff > 0.02 && diff < - 0.02) setQuat(alpha)
         previous = alpha
     }
 
