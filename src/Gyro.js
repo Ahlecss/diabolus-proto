@@ -15,17 +15,12 @@ export const Gyro = (isActive) => {
         // const beta = (e.beta * Math.PI) / 180;
         // const gamma = (e.gamma * Math.PI) / 180;
         // const diff = alpha - previous
-        setQuat(alpha)
-        // console.log(diff)
-        // if (diff > 0.002 || diff < - 0.002) setQuat(alpha)
-        // previous = alpha
-    }
-
-    const setQuat = (alpha) => {
         var euler = new Euler(0, alpha, 0, "YXZ"); // ' is the order of rotations
         var quaternion = new Quaternion();
         quaternion.setFromEuler(euler);
-        camera.setRotationFromQuaternion(quaternion);
+        camera.setRotationFromQuaternion(quaternion);        // console.log(diff)
+        // if (diff > 0.002 || diff < - 0.002) setQuat(alpha)
+        // previous = alpha
     }
 
     useEffect(() => {
