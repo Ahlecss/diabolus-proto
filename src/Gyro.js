@@ -1,5 +1,6 @@
 import { useFrame, useThree } from "@react-three/fiber"
 import { easing } from "maath"
+import { cubic } from "maath/easing"
 import { useEffect } from "react"
 
 export const Gyro = () => {
@@ -9,7 +10,7 @@ export const Gyro = () => {
 
     const deviceMotion = (e) => {
         console.log(e)
-        test = +(e.alpha / 360).toFixed(1)
+        test = +(e.alpha * 3,14159 / 180).toFixed(1)
         // camera.rotation.y = test
         console.log(camera.rotation.y)
     }
