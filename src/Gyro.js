@@ -7,7 +7,7 @@ import { Euler, Quaternion } from "three"
 export const Gyro = (isActive) => {
 
     const camera = useThree((state) => state.camera)
-    const previous = 0;
+    let previous = 0;
 
     const deviceMotion = (e) => {
 
