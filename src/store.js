@@ -6,8 +6,10 @@ export const useFramesStore = create((set) => ({
     invisible: false,
     currentGodrays: 0,
     isGodRays: false,
+    framesRef: false,
     changeHoverId: (newId) => set(() => ({ hoverId: newId })),
     changeFocusId: (newId) => set(() => ({ focusId: newId })),
-    setInvisible: (value) => set(() => ({ invisible: value})),
-    handleGodrays: (bool, id) => set(() => ({ currentGodrays: id, isGodRays: boold}))
+    setInvisible: (value) => set(() => ({ invisible: value })),
+    handleGodrays: (bool, id) => set(() => ({ currentGodrays: id, isGodRays: bool })),
+    setFramesRef: (ref) => set(() => ({ framesRef: ref }))
 }))

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback, memo } from 'react'
 import { useRoute, useLocation } from 'wouter'
+import { isMobile } from 'react-device-detect'
 import { Quaternion, Vector3 } from "three"
 import { cubic, circ } from 'maath/easing'
 import { easing } from 'maath'
@@ -8,9 +9,9 @@ import gsap, { Cubic, Power3 } from 'gsap'
 import { EffectComposer, GodRays, Bloom, SSR } from '@react-three/postprocessing'
 import { useFrame, useThree } from '@react-three/fiber'
 
-import { Frame } from "./Frame"
 import { lerp } from './utils.js'
-import { isMobile } from 'react-device-detect'
+import { Frame } from "./Frame"
+import { CameraRotate } from './CameraRotate.js'
 import { Gyro } from './Gyro.js'
 
 export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }) => {
@@ -164,8 +165,9 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
     // if (hovered != 1) exposure = lerp(exposure, 0.2, 0.1)
     // else exposure = lerp(exposure, 0, 0.1)
     // easing.damp3(state.camera.position, p, circ.inOut(0.8), dt)
-    if (!isMobile && !clicked.current)
+    if (clicked.current !== null) {
       easing.dampQ(state.camera.quaternion, q, circ.inOut(0.6), dt)
+    }
   })
 
   return (
@@ -180,6 +182,7 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
       </group>
 
       {isMobile && <Gyro isActive={clicked.current} />}
+      {!isMobile && <CameraRotate />}
       {
         // itemsRef.current[0] && (
         //   <EffectComposer disableNormalPass multisampling={0}>

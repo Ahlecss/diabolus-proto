@@ -119,26 +119,26 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
             <boxGeometry />
             <meshBasicMaterial toneMapped={false} fog={false} />
           </mesh> */}
-        {/* <Scroll> */}
-          <group ref={vitrail} >
-            <mesh receiveShadow position={[0, 0, 0/*.1*/]}
-              ref={el => itemsRef.current[i] = el}
-              key={i}
-              type={type}
-              ratios={ratios}
-              center={true}
-              trueId={i}
-              name={name}
-              transparent={true}
-              onPointerOver={(e) => pointerEvent(e, true)}
-              onPointerOut={(e) => pointerEvent(e, false)}
-            >
-              <planeBufferGeometry attach="geometry" args={[3.1 * 1.3 * (type === 'simple' ? 1 : 3), 10 * 1.3, 100, 100]} />
-              <imageFadeMaterial ref={shaderRef} attach="material" tex1={tex1} tex2={tex2} transparent={true} colorSpace={SRGBColorSpace} side={DoubleSide} />
-            </mesh>
+      {/* <Scroll> */}
+      <group ref={vitrail} >
+        <mesh receiveShadow position={[0, 0, 0/*.1*/]}
+          ref={el => itemsRef.current[i] = el}
+          key={i}
+          type={type}
+          ratios={ratios}
+          center={true}
+          trueId={i}
+          name={name}
+          transparent={true}
+          onPointerOver={(e) => pointerEvent(e, true)}
+          onPointerOut={(e) => pointerEvent(e, false)}
+        >
+          <planeBufferGeometry attach="geometry" args={[3.1 * 1.3 * (type === 'simple' ? 1 : 3), 10 * 1.3, 100, 100]} />
+          <imageFadeMaterial ref={shaderRef} attach="material" tex1={tex1} tex2={tex2} transparent={true} colorSpace={SRGBColorSpace} side={DoubleSide} />
+        </mesh>
 
-          </group>
-          {/* <Clouds>
+      </group>
+      <Clouds>
         <Float
           speed={1} // Animation speed, defaults to 1
           rotationIntensity={3} // XYZ rotation intensity, defaults to 1
@@ -155,11 +155,11 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
         >
           <Cloud layers={0} ref={cloudRef} color={'#aaa'} bounds={[6, 5, 5]} concentrate="outside" seed={3} position={[0, 0, 0]} segments={10} volume={10} fade={0} growth={4} speed={1} opacity={Math.random()} />
         </Float>
-      </Clouds> */}
+      </Clouds>
 
 
-          {/* <SpotLight castShadow ref={light} penumbra={0} distance={60} angle={3.5} attenuation={5} anglePower={4} intensity={2} color="red" position={[0, 5, 1.5]} depthBuffer={depthBuffer} /> */}
-        {/* </Scroll> */}
+      {/* <SpotLight castShadow ref={light} penumbra={0} distance={60} angle={3.5} attenuation={5} anglePower={4} intensity={2} color="red" position={[0, 5, 1.5]} depthBuffer={depthBuffer} /> */}
+      {/* </Scroll> */}
     </group >
   )
 }))
