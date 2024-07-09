@@ -4,10 +4,13 @@ import { useEffect } from "react"
 export const Gyro = () => {
 
     const camera = useThree((state) => state.camera)
+    let test = 0
 
     const deviceMotion = (e) => {
         console.log(e)
-        camera.rotation.y = e.alpha / 120
+        test = +(e.alpha / 360).toFixed(2)
+        camera.rotation.y = test
+        console.log(camera.rotation.y)
     }
 
 
