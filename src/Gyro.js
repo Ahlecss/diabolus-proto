@@ -17,11 +17,11 @@ export const Gyro = () => {
         // if(test != test) lla = (test * Math.PI) / 180
 
 
-        const alpha = (e.beta * Math.PI) / 180;
+        const alpha = (e.alpha * Math.PI) / 180;
         const beta = (e.beta * Math.PI) / 180;
         const gamma = (e.gamma * Math.PI) / 180;
 
-        var euler = new Euler(beta, gamma, alpha, "ZXY"); // ' is the order of rotations
+        var euler = new Euler(0, 0, alpha, "YXZ"); // ' is the order of rotations
         var quaternion = new Quaternion();
         quaternion.setFromEuler(euler);
         camera.setRotationFromQuaternion(quaternion);
