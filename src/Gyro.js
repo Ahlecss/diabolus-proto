@@ -4,18 +4,14 @@ import { cubic } from "maath/easing"
 import { useEffect } from "react"
 import { Euler, Quaternion } from "three"
 
-export const Gyro = () => {
+export const Gyro = (isActive) => {
 
     const camera = useThree((state) => state.camera)
-    let test = 0
-    let lla = 0
-    let previous = 0;
+    // let test = 0
+    // let lla = 0
+    // let previous = 0;
 
     const deviceMotion = (e) => {
-        // test = +(e.alpha).toFixed(3)
-        // console.log(test)
-        // if(test != test) lla = (test * Math.PI) / 180
-
 
         const alpha = (e.alpha * Math.PI) / 180;
         const beta = (e.beta * Math.PI) / 180;
@@ -27,14 +23,15 @@ export const Gyro = () => {
         camera.setRotationFromQuaternion(quaternion);
     }
 
-    useFrame((state, dt) => {
-        // easing.damp3(state.camera.rotation, [0, lla, 0], 0.1, dt)
-        // console.log(state.camera.rotation.y)
-    })
+    // useFrame((state, dt) => {
+    //     // easing.damp3(state.camera.rotation, [0, lla, 0], 0.1, dt)
+    //     // console.log(state.camera.rotation.y)
+    // })
 
 
     useEffect(() => {
-        window.addEventListener('deviceorientation', deviceMotion)
+        if (isActive) window.addEventListener('deviceorientation', deviceMotion)
+        else window.removeEventListener('deviceorientation', deviceMotion)
         return () => window.removeEventListener('deviceorientation', deviceMotion)
     }, [])
 }
