@@ -9,7 +9,7 @@ export const Gyro = () => {
         console.log(e)
         console.log(`${e.acceleration.y} m/s2`);
 
-        // camera.rotation.y = 
+        camera.rotation.y = e.rotationRate.gamma
     }
 
 
