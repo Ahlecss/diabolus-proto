@@ -37,7 +37,6 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
   let offsetX = 0;
   let offsetY = 0;
 
-
   // Use Drag mobile in a specific component ? With clicked current as a props
   const onMouseDown = (e) => {
     console.log('onMouseDown', clicked.current);
@@ -64,10 +63,10 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
   const onTouchMove = (e) => {
     if (!canDrag) return
     isDragging = true
-    offsetX = e.changedTouches[0].pageX / 100 - startX
-    offsetY = e.changedTouches[0].pageY / 100 - startY
-    startX = e.changedTouches[0].pageX / 100
-    startY = e.changedTouches[0].pageY / 100
+    offsetX = e.changedTouches[0].pageX / 50 + startX
+    offsetY = e.changedTouches[0].pageY / 50 - startY
+    startX = e.changedTouches[0].pageX / 50
+    startY = e.changedTouches[0].pageY / 50
     console.log('mousemove', e.client, startX);
 
     groupYTo(Math.max(0, Math.min(ref.current.position.y - offsetY, 10.5)))
@@ -98,11 +97,13 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
     document.addEventListener('mousemove', onMouseMove)
     document.addEventListener('touchmove', onTouchMove)
     document.addEventListener('mouseup', onMouseUp2)
+    document.addEventListener('touchend', onMouseUp2)
   }
   const removeDragEvents = () => {
     document.removeEventListener('mousemove', onMouseMove)
     document.removeEventListener('touchmove', onTouchMove)
     document.removeEventListener('mouseup', onMouseUp2)
+    document.removeEventListener('touchend', onMouseUp2)
   }
 
   useEffect(() => {
