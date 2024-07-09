@@ -21,7 +21,7 @@ export const Gyro = () => {
         const beta = (e.beta * Math.PI) / 180;
         const gamma = (e.gamma * Math.PI) / 180;
 
-        var euler = new Euler(beta, 0, 0, "YXZ"); // ' is the order of rotations
+        var euler = new Euler(0, alpha, 0, "YXZ"); // ' is the order of rotations
         var quaternion = new Quaternion();
         quaternion.setFromEuler(euler);
         camera.setRotationFromQuaternion(quaternion);
