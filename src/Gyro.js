@@ -29,8 +29,14 @@ export const Gyro = (isActive) => {
     }
 
     useEffect(() => {
-        if (isActive) window.addEventListener('deviceorientation', deviceMotion)
-        else window.removeEventListener('deviceorientation', deviceMotion)
+        if (isActive) {
+            console.log('mount');
+            window.addEventListener('deviceorientation', deviceMotion)
+        }
+        else {
+            console.log('unmount');
+            window.removeEventListener('deviceorientation', deviceMotion)
+        }
         return () => window.removeEventListener('deviceorientation', deviceMotion)
     }, [])
 }
