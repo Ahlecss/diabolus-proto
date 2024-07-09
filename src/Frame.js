@@ -139,7 +139,7 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
         </mesh>
 
       </group>
-      <Clouds>
+      {/* <Clouds>
         <Float
           speed={1} // Animation speed, defaults to 1
           rotationIntensity={3} // XYZ rotation intensity, defaults to 1
@@ -156,7 +156,7 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
         >
           <Cloud layers={0} ref={cloudRef} color={'#aaa'} bounds={[6, 5, 5]} concentrate="outside" seed={3} position={[0, 0, 0]} segments={10} volume={10} fade={0} growth={4} speed={1} opacity={Math.random()} />
         </Float>
-      </Clouds>
+      </Clouds> */}
 
 
       {/* <SpotLight castShadow ref={light} penumbra={0} distance={60} angle={3.5} attenuation={5} anglePower={4} intensity={2} color="red" position={[0, 5, 1.5]} depthBuffer={depthBuffer} /> */}
