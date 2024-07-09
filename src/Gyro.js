@@ -12,12 +12,12 @@ export const Gyro = () => {
     const deviceMotion = (e) => {
         console.log(e)
         // test = +(e.alpha * 3,14159 / 180).toFixed(2)
-        camera.rotation.y = e.alpha * (180 / Math.PI)
-        console.log(camera.rotation.y)
+        test = e.alpha * (180 / Math.PI)
     }
 
     useFrame((state, dt) => {
-        // easing.damp3(state.camera.rotation, [0, test, 0], 0.1, dt)
+        easing.damp3(state.camera.rotation, [0, (test * Math.PI) / 180, 0], 0.1, dt)
+        console.log(state.camera.rotation.y)
     })
 
 
