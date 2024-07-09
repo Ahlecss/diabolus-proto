@@ -11,6 +11,7 @@ import { useFramesStore } from './store.js'
 import { memo } from 'react'
 import { useEffect } from 'react'
 import { useDrag, useGesture } from '@use-gesture/react'
+import { vitrauxData } from './vitrauxData.js'
 
 const GOLDENRATIO = 1.61803398875
 
@@ -66,17 +67,17 @@ function ScrollWrap({ vitraux }) {
   const off = useRef({ x: 0, y: 0 })
 
   // Find a way to avoid camera value shiet
-  const bind = useDrag(({ down, offset: [x, y] }) => { { off.current.x = (x / 100), off.current.y = y / 100 } }, { delay: 200 })
+  // const bind = useDrag(({ down, offset: [x, y] }) => { { off.current.x = (x / 100), off.current.y = y / 100 } }, { delay: 200 })
 
-  useFrame(() => {
-    camera.position.x = camera.position.x + off.current.x
-    camera.position.y = camera.position.y + off.current.y
-    off.current.x = 0
-    off.current.y = 0
-  })
+  // useFrame(() => {
+  //   camera.position.x = camera.position.x + off.current.x
+  //   camera.position.y = camera.position.y + off.current.y
+  //   off.current.x = 0
+  //   off.current.y = 0
+  // })
   return (
     // <ScrollControls infinite={focusId === null ? true : false} pages={focusId === null ? 15 : 1.45} damping={0.2}>
-    <group ref={groupRef} {...bind()}>
+    <group ref={groupRef} /*{...bind()}*/>
       <ScrollWrapper vitraux={vitraux} />
     </group>
     // </ScrollControls>
@@ -104,9 +105,9 @@ const ScrollWrapper = ({ vitraux }) => {
   var dtScroll = useRef(0);
 
   const onRotate = (e) => {
-    console.log(e);
-    dtScroll.current += e.deltaY / 10000
-    console.log(dtScroll.current);
+    // console.log(e);
+    dtScroll.current += Math.PI * 2 * (e.deltaY / 10000)
+    // console.log(dtScroll.current);
   }
 
   useEffect(() => {
@@ -114,15 +115,21 @@ const ScrollWrapper = ({ vitraux }) => {
       document.addEventListener('wheel', onRotate)
     } else {
       document.removeEventListener('wheel', onRotate)
+      setTimeout(() => {
+        console.log(focusId)
+        // if(focusId) dtScroll.current = - 2 * Math.PI * ((focusId + 1) / 8)
+        //   console.log(dtScroll.current)
+      }, 1000)
     }
     return () => {
       document.removeEventListener('wheel', onRotate)
+      // dtScroll.current = 0
     }
   })
 
   useFrame((state, dt) => {
     // console.log(scroll.offset)
-    easing.dampE(groupRef.current.rotation, [0, Math.PI * 2 * dtScroll.current, 0], cubic.inOut(0.4), dt)
+    easing.dampE(groupRef.current.rotation, [0, dtScroll.current, 0], cubic.inOut(0.4), dt)
   })
 
   return (

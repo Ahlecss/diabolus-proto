@@ -49,7 +49,7 @@ const ImageFadeMaterial = shaderMaterial(
 extend({ ImageFadeMaterial })
 
 export const Frame = memo(forwardRef((props, itemsRef) => {
-  const { url, texture1, texture2, type, i, idd, length } = props
+  const { url, texture1, texture2, type, ratios, i, idd, length } = props
   const vitrail = useRef()
   // const frame = useRef()
   // Old Route way
@@ -88,7 +88,7 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
     e.stopPropagation()
     hovered.current = isOver
     changeHoverId(isOver ? i : null)
-    props.handleGodrays(isOver, i)
+    // props.handleGodrays(isOver, i)
   }
 
   const [tex1, tex2] = useTexture([texture1, texture2])
@@ -124,6 +124,8 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
             <mesh receiveShadow position={[0, 0, 0/*.1*/]}
               ref={el => itemsRef.current[i] = el}
               key={i}
+              type={type}
+              ratios={ratios}
               center={true}
               trueId={i}
               name={name}

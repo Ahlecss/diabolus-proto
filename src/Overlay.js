@@ -13,13 +13,13 @@ export const Overlay = () => {
     const [isActive, setIsActive] = useState(false);
 
     useEffect(() => {
-        console.log(hoverId, focusId)
+        // console.log(hoverId, focusId)
         if (hoverId !== null) {
-            console.log(hoverId)
+            // console.log(hoverId)
             setIsActive(hoverId)
         }
         else if (focusId !== null) {
-            console.log(focusId)
+            // console.log(focusId)
             setIsActive(focusId)
         }
         else setIsActive(undefined)
@@ -32,9 +32,9 @@ export const Overlay = () => {
                 }
             </div>
             <div className={`cartel_wrapper ${focusId !== null ? 'cartel_active' : ''}`}>
-                <button className={`cartel_button ${focusId !== null ? 'button_active' : ''} ${invisible ? 'button_focus' : ''} `} onClick={(e) => (e.stopPropagation(), console.log('tets'), setInvisible(!invisible))}>Discover references</button>
+                <button className={`cartel_button ${focusId !== null ? 'button_active' : ''} ${invisible ? 'button_focus' : ''} `} onClick={(e) => (e.stopPropagation(), setInvisible(!invisible))}>Discover references</button>
             </div>
-            <SoundManager />
+            {/* <SoundManager /> */}
         </>
     )
     return (

@@ -1,21 +1,17 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, memo } from 'react'
 import { useRoute, useLocation } from 'wouter'
 import { Quaternion, Vector3 } from "three"
-import { cubic, quint, circ, quart, expo } from 'maath/easing'
+import { cubic, circ } from 'maath/easing'
 import { easing } from 'maath'
-import { clamp } from 'maath/misc'
-import gsap, { Cubic } from 'gsap'
+import gsap, { Cubic, Power3 } from 'gsap'
 
 import { EffectComposer, GodRays, Bloom, SSR } from '@react-three/postprocessing'
-import { ScrollControls, useScroll } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
-import { useGesture } from '@use-gesture/react'
 
 import { Frame } from "./Frame"
 import { lerp } from './utils.js'
-import { useFramesStore } from './store.js'
 
-export function Frames({ vitraux, q = new Quaternion(), p = new Vector3() }) {
+export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }) => {
   const ref = useRef([])
   const clicked = useRef()
   const god = useRef()
@@ -23,18 +19,74 @@ export function Frames({ vitraux, q = new Quaternion(), p = new Vector3() }) {
   const itemsRef = useRef([]);
   const [, params] = useRoute('/item/:id')
   const [, setLocation] = useLocation()
-  // const data = useScroll()
-  let active = false;
-  let isDragging = false
-  const [expo, setExpo] = useState(0);
-
   const camera = useThree((state) => state.camera)
 
-  console.log(camera.position)
-  // const {
-  //   changeHoverId,
-  //   changeFocusId,
-  // } = useFramesStore((s) => s);
+  const groupXTo = gsap.quickTo(ref.current.position, 'x', { duration: 0.1, ease: Power3.easeOut });
+  const groupYTo = gsap.quickTo(ref.current.position, 'y', { duration: 0.1, ease: Power3.easeOut });
+  const groupZTo = gsap.quickTo(ref.current.position, 'z', { duration: 0.1, ease: Power3.easeOut });
+
+  const resetXTo = gsap.quickTo(ref.current.position, 'x', { duration: 3, ease: Power3.easeOut });
+  const resetYTo = gsap.quickTo(ref.current.position, 'y', { duration: 3, ease: Power3.easeOut });
+  // const data = useScroll()
+  // const [expo, setExpo] = useState(0);
+  let active = false;
+  let isDragging = false;
+  let canDrag = false;
+  let startX = 0;
+  let startY = 0;
+  let offsetX = 0;
+  let offsetY = 0;
+
+
+  // Use Drag mobile in a specific component ? With clicked current as a props
+  const onMouseDown = (e) => {
+    console.log('onMouseDown', clicked.current);
+    if (!clicked.current) return
+    canDrag = true;
+    startX = e.clientX / 100;
+    startY = e.clientY / 100;
+  }
+  const onMouseMove = (e) => {
+    if (!canDrag) return
+    isDragging = true
+    offsetX = e.clientX / 100 - startX
+    offsetY = e.clientY / 100 - startY
+    startX = e.clientX / 100
+    startY = e.clientY / 100
+    console.log('mousemove', ref.current.position.x);
+
+    groupYTo(Math.max(0, Math.min(ref.current.position.y - offsetY, 10.5)))
+    if (clicked.current.type === 'triple') {
+      groupXTo(Math.max(-3.5, Math.min(ref.current.position.x + offsetX * clicked.current.ratios.x, 4.5)))
+      groupZTo(Math.max(-3.5, Math.min(ref.current.position.z + (offsetX * clicked.current.ratios.z), 4.5)))
+    }
+  }
+  const onMouseUp = (e) => {
+    if (!isDragging) {
+      e.stopPropagation()
+      setLocation(clicked.current === e.object ? '/' : '/item/' + e.object.name)
+
+      // Refacto to longer
+      resetXTo(0)
+      resetYTo(0)
+
+      // offsetX = 0;
+      // offsetY = 0;
+    }
+    isDragging = false
+  }
+  const onMouseUp2 = () => {
+    canDrag = false;
+  }
+
+  const addDragEvents = () => {
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp2)
+  }
+  const removeDragEvents = () => {
+    document.removeEventListener('mousemove', onMouseMove)
+    document.removeEventListener('mouseup', onMouseUp2)
+  }
 
   useEffect(() => {
     // const a = data.range(0, 1)
@@ -44,27 +96,37 @@ export function Frames({ vitraux, q = new Quaternion(), p = new Vector3() }) {
       clicked.current.parent.localToWorld(p.set(0, 5, 2))
       gsap.to(camera.position, {
         x: p.x, y: p.y, z: p.z,
-        duration: 2,
+        duration: 1,
         ease: Cubic.easeInOut
       });
       clicked.current.parent.getWorldQuaternion(q)
       active = true;
+      addDragEvents()
+      // camera.lookAt(p)
+      // console.log(camera.rotation.y)
+      // camera.rotation.y = clicked.current.parent.parent.rotation.y
+      // console.log(camera.rotation)
+      // console.log(clicked.current)
     } else {
       gsap.to(camera.position, {
         x: 0, y: 0, z: 5.5,
-        duration: 2,
+        duration: 1,
         ease: Cubic.easeInOut
       });
       q.identity()
       active = false;
+
+      removeDragEvents()
     }
+
+    return () => removeDragEvents()
   })
 
-  const change = (hover, index) => {
-    setHovered(index);
-  }
+  // const change = (hover, index) => {
+  // setHovered(index);
+  // }
 
-  const handleGodrays = useCallback(change, [setHovered])
+  // const handleGodrays = useCallback(change, [setHovered])
 
   useFrame((state, dt) => {
     // ref.current.rotation.y += 0.01
@@ -86,43 +148,26 @@ export function Frames({ vitraux, q = new Quaternion(), p = new Vector3() }) {
     easing.dampQ(state.camera.quaternion, q, circ.inOut(0.6), dt)
   })
 
-  // const onScroll = (e) => {
-  //   console.log(e);
-  //   dtScroll.current += e.deltaY / 10000
-  //   console.log(dtScroll.current);
-  // }
-  useEffect(() => {
-    console.log(clicked.current)
-    // if (clicked.current === null) {
-    //   document.removeEventListener('wheel', onScroll)
-    // } else {
-    //   document.addEventListener('wheel', onScroll)
-    // }
-    // return () => {
-    //   document.removeEventListener('wheel', onScroll)
-    // }
-  }, [clicked])
-
-  // let xTo = gsap.quickTo(camera.position, 'x', { duration: 0, ease: "power3" });
-  // let yTo = gsap.quickTo(camera.position, 'y', { duration: 0, ease: "power3" });
-
   return (
     <>
       <group
         ref={ref}
-        onClick={(e) => { if (isDragging) return; else (e.stopPropagation(), setLocation(clicked.current === e.object ? '/' : '/item/' + e.object.name)) }}
+        onPointerDown={onMouseDown}
+        onPointerUp={onMouseUp}
         // Add changeHoverId(false), or setHovered(undefined)
         onPointerMissed={() => (setLocation('/'), setHovered(undefined))}>
-        {vitraux.map((props, i) => <Frame key={i} i={i} handleGodrays={handleGodrays} {...props} length={vitraux.length} ref={itemsRef} /> /* prettier-ignore */)}
+        {vitraux.map((props, i) => <Frame key={i} i={i} /*handleGodrays={handleGodrays}*/ {...props} length={vitraux.length} ref={itemsRef} /> /* prettier-ignore */)}
       </group>
-      {itemsRef.current[0] && (
-        <EffectComposer disableNormalPass multisampling={0}>
-          {hovered < 8 && <GodRays ref={god} sun={itemsRef.current[hovered]} density={0.4} weight={0.4} exposure={0.4} decay={0.8} blur />}
-          <Bloom luminanceThreshold={0} mipmapBlur luminanceSmoothing={0.0} intensity={0.3} />
-          {/* <SSR /> */}
-        </EffectComposer>
-      )}
+      {
+        // itemsRef.current[0] && (
+        //   <EffectComposer disableNormalPass multisampling={0}>
+        //     {hovered < 8 && <GodRays ref={god} sun={itemsRef.current[hovered]} density={0.4} weight={0.4} exposure={0.4} decay={0.8} blur />}
+        //     <Bloom luminanceThreshold={0} mipmapBlur luminanceSmoothing={0.0} intensity={0.3} />
+        //     {/* <SSR /> */}
+        //   </EffectComposer>
+        // )
+      }
     </>
 
   )
-}
+})
