@@ -142,11 +142,11 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
     return () => removeDragEvents()
   })
 
-  // const change = (hover, index) => {
-  // setHovered(index);
-  // }
+  const change = (hover, index) => {
+    setHovered(index);
+  }
 
-  // const handleGodrays = useCallback(change, [setHovered])
+  const handleGodrays = useCallback(change, [setHovered])
 
   useFrame((state, dt) => {
     // ref.current.rotation.y += 0.01
@@ -178,19 +178,19 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
         onPointerUp={onMouseUp}
         // Add changeHoverId(false), or setHovered(undefined)
         onPointerMissed={() => (setLocation('/'), setHovered(undefined))}>
-        {vitraux.map((props, i) => <Frame key={i} i={i} /*handleGodrays={handleGodrays}*/ {...props} length={vitraux.length} ref={itemsRef} /> /* prettier-ignore */)}
+        {vitraux.map((props, i) => <Frame key={i} i={i} handleGodrays={handleGodrays} {...props} length={vitraux.length} ref={itemsRef} /> /* prettier-ignore */)}
       </group>
 
       {isMobile && <Gyro isActive={clicked.current} />}
       {!isMobile && <CameraRotate />}
       {
-        // itemsRef.current[0] && (
-        //   <EffectComposer disableNormalPass multisampling={0}>
-        //     {hovered < 8 && <GodRays ref={god} sun={itemsRef.current[hovered]} density={0.4} weight={0.4} exposure={0.4} decay={0.8} blur />}
-        //     <Bloom luminanceThreshold={0} mipmapBlur luminanceSmoothing={0.0} intensity={0.3} />
-        //     {/* <SSR /> */}
-        //   </EffectComposer>
-        // )
+        itemsRef.current[0] && (
+          <EffectComposer disableNormalPass multisampling={0}>
+            {hovered < 8 && <GodRays ref={god} sun={itemsRef.current[hovered]} density={0.4} weight={0.4} exposure={0.4} decay={0.8} blur />}
+            <Bloom luminanceThreshold={0} mipmapBlur luminanceSmoothing={0.0} intensity={0.3} />
+            {/* <SSR /> */}
+          </EffectComposer>
+        )
       }
     </>
 

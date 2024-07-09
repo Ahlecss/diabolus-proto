@@ -88,7 +88,8 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
     e.stopPropagation()
     hovered.current = isOver
     changeHoverId(isOver ? i : null)
-    // props.handleGodrays(isOver, i)
+    props.handleGodrays(isOver, i)
+    // handleGodrays(isOver, i)
   }
 
   const [tex1, tex2] = useTexture([texture1, texture2])
