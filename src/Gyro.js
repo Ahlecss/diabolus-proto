@@ -1,0 +1,19 @@
+import { useEffect } from "react"
+
+export const Gyro = () => {
+
+    const camera = useThree((state) => state.camera)
+
+    const deviceMotion = (e) => {
+        console.log(e)
+        console.log(`${e.acceleration.y} m/s2`);
+
+        // camera.rotation.y = 
+    }
+
+
+    useEffect(() => {
+
+        window.addEventListener('devicemotion', deviceMotion)
+    }, [])
+}

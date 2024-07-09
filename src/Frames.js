@@ -11,6 +11,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { Frame } from "./Frame"
 import { lerp } from './utils.js'
 import { isMobile } from 'react-device-detect'
+import { Gyro } from './Gyro.js'
 
 export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }) => {
   const ref = useRef([])
@@ -108,11 +109,10 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
   }
 
   useEffect(() => {
-    // const a = data.range(0, 1)
     clicked.current = ref.current.getObjectByName(params?.id)
     if (clicked.current) {
       clicked.current.parent.updateWorldMatrix(true, true)
-      clicked.current.parent.localToWorld(p.set(0, 5, 2))
+      clicked.current.parent.localToWorld(p.set(0, 5, isMobile ? 4 : 2))
       gsap.to(camera.position, {
         x: p.x, y: p.y, z: p.z,
         duration: 1,
@@ -177,6 +177,8 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
         onPointerMissed={() => (setLocation('/'), setHovered(undefined))}>
         {vitraux.map((props, i) => <Frame key={i} i={i} /*handleGodrays={handleGodrays}*/ {...props} length={vitraux.length} ref={itemsRef} /> /* prettier-ignore */)}
       </group>
+
+      {isMobile && <Gyro />}
       {
         // itemsRef.current[0] && (
         //   <EffectComposer disableNormalPass multisampling={0}>
