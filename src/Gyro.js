@@ -7,7 +7,7 @@ export const Gyro = () => {
 
     const deviceMotion = (e) => {
         console.log(e)
-        camera.rotation.y = e.alpha
+        camera.rotation.y = e.alpha / 120
     }
 
 
