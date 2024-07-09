@@ -63,7 +63,7 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
   const onTouchMove = (e) => {
     if (!canDrag) return
     isDragging = true
-    offsetX = e.changedTouches[0].pageX / 100 + startX
+    offsetX = e.changedTouches[0].pageX / 100 - startX
     offsetY = e.changedTouches[0].pageY / 100 - startY
     startX = e.changedTouches[0].pageX / 100
     startY = e.changedTouches[0].pageY / 100
