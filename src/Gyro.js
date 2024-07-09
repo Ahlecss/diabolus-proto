@@ -11,8 +11,8 @@ export const Gyro = () => {
 
     const deviceMotion = (e) => {
         console.log(e)
-        test = +(e.alpha * 3,14159 / 180).toFixed(2)
-        camera.rotation.y = e.alpha / 1000
+        // test = +(e.alpha * 3,14159 / 180).toFixed(2)
+        camera.rotation.y = e.alpha * (180 / Math.PI)
         console.log(camera.rotation.y)
     }
 
