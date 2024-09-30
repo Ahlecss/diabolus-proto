@@ -3,7 +3,7 @@ import { useRoute, useLocation } from 'wouter'
 import { isMobile } from 'react-device-detect'
 import { Quaternion, Vector3 } from "three"
 import { cubic, circ } from 'maath/easing'
-import { easing } from 'maath'
+import { easing, random } from 'maath'
 import gsap, { Cubic, Power3 } from 'gsap'
 
 import { EffectComposer, GodRays, Bloom, SSR, N8AO, SMAA } from '@react-three/postprocessing'
@@ -13,9 +13,14 @@ import { lerp } from './utils.js'
 import { Frame } from "./Frame"
 import { CameraRotate } from './CameraRotate.js'
 import { Gyro } from './Gyro.js'
-import { CubeCamera, Reflector, useTexture, useBoxProjectedEnv, useCubeCamera, MeshReflectorMaterial, useDetectGPU } from '@react-three/drei'
-import floo from "./images/SurfaceImperfections003_1K_var1.jpg"
-import norma from "./images/SurfaceImperfections003_1K_Normal.jpg"
+import { CubeCamera, Reflector, useTexture, useBoxProjectedEnv, useCubeCamera, MeshReflectorMaterial, useDetectGPU, Clouds, Cloud } from '@react-three/drei'
+
+import rou from "./images/rough.jpg"
+import floo from "./images/roughness.jpg"
+import norma from "./images/normal.png"
+import opa from "./images/opacity.jpg"
+import bum from "./images/bump.jpg"
+import { RepeatWrapping } from 'three'
 
 
 export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }) => {
@@ -157,7 +162,13 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
 
   const handleGodrays = useCallback(change, [setHovered])
 
-  const [floor, normal] = useTexture([floo, norma])
+  const [rough, normal, opacity, bump] = useTexture([rou, norma, opa, bum])
+
+
+  console.log(normal)
+
+  normal.repeat.set(20, 20)
+  normal.wrapS = normal.wrapT = RepeatWrapping;
 
 
   useFrame((state, dt) => {
@@ -197,6 +208,10 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
         {vitraux.map((props, i) => <Frame key={i} i={i} handleGodrays={handleGodrays} {...props} length={vitraux.length} ref={itemsRef} /> /* prettier-ignore */)}
       </group>
 
+      <Reflector resolution={512} args={[50, 50]} mirror={0.5} mixBlur={4} mixStrength={5} rotation={[-Math.PI / 2, 0, Math.PI / 2]} blur={[100, 100]} position={[0, -7, 0]}>
+        {(Material, props) =><Material color="#999" metalness={0.6} roughnessMap={rough} normalMap={normal} {...props} transparent={false} />
+        }
+      </Reflector>
 
       {/* <CubeCamera resolution={1024}>
         {(texture) => (
@@ -237,7 +252,7 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
       {
         itemsRef.current[0] && (
           <EffectComposer disableNormalPass multisampling={0}>
-            {hovered < 8 && <GodRays ref={god} sun={itemsRef.current[hovered]} density={0.4} weight={0.4} exposure={0.4} decay={0.8} blur />}
+            {hovered < 8 && <GodRays ref={god} sun={itemsRef.current[hovered]} density={0.4 /* 0.8 */} weight={0.4} exposure={0.4} decay={0.8} blur />}
             <Bloom luminanceThreshold={0} mipmapBlur luminanceSmoothing={0.0} intensity={0.3} />
             {/* <SSR /> */}
             {/* <N8AO halfRes color="red" aoRadius={2} intensity={1} aoSamples={6} denoiseSamples={4} />

@@ -1,9 +1,9 @@
 import { forwardRef, memo, useEffect, useRef, useState } from "react"
 import getUuidByString from "uuid-by-string"
 import { useRoute } from "wouter"
-import { easing } from "maath"
+import { easing, random } from "maath"
 import { cubic } from "maath/easing"
-import { DoubleSide, MeshBasicMaterial, SRGBColorSpace } from "three"
+import { DoubleSide, MeshBasicMaterial, SRGBColorSpace, Vector3 } from "three"
 
 import { Cloud, Clouds, CubeCamera, Float, Scroll, ScrollControls, shaderMaterial, useBoxProjectedEnv, useCursor, useDepthBuffer, useTexture } from "@react-three/drei"
 import { extend, useFrame, useThree } from "@react-three/fiber"
@@ -113,7 +113,7 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
     <group
       position={[
         15 * Math.sin(2 * Math.PI * ((i + 1) / length)),
-        2,
+        1.5,
         0 + 15 * -Math.cos(2 * Math.PI * ((i + 1) / length))]}
       rotation={[0,
         -2 * Math.PI * ((i + 1) / length),
@@ -141,24 +141,28 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
         </mesh>
 
       </group>
-      {/* <Clouds>
-        <Float
+
+      <Puffycloud seed={10} />
+
+      {/* <Clouds> */}
+
+      {/* <Float
           speed={1} // Animation speed, defaults to 1
-          rotationIntensity={0} // XYZ rotation intensity, defaults to 1
+          rotationIntensity={0.2} // XYZ rotation intensity, defaults to 1
           floatIntensity={1} // Up/down float intensity, works like a multiplier with floatingRange,defaults to 1
-          floatingRange={[13, 14]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
+          floatingRange={[11, 12]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
         >
-          <Cloud layers={0} ref={cloudRef} color={'#ccc'} bounds={[6, 5, 5]} concentrate="outside" seed={2} position={[0, 0, 0]} segments={10} volume={10} fade={0} growth={4} speed={1} opacity={Math.random()} />
-        </Float>
-        <Float
+          <Cloud layers={0} ref={cloudRef} color={'#aaa'} bounds={[5, 2, 1]} concentrate="outside" seed={Math.random()* 10} position={[0, 0, 0]} segments={10} volume={10} fade={1} growth={4} speed={0.2} opacity={Math.random()} />
+        </Float> */}
+        {/* <Float
           speed={1} // Animation speed, defaults to 1
           rotationIntensity={0} // XYZ rotation intensity, defaults to 1
           floatIntensity={0.6} // Up/down float intensity, works like a multiplier with floatingRange,defaults to 1
           floatingRange={[12, 13]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
         >
           <Cloud layers={0} ref={cloudRef} color={'#bbb'} bounds={[6, 5, 5]} concentrate="outside" seed={3} position={[0, 0, 0]} segments={10} volume={10} fade={0} growth={4} speed={1} opacity={Math.random()} />
-        </Float>
-      </Clouds> */}
+        </Float> */}
+      {/* </Clouds> */}
 
 
       {/* <SpotLight castShadow ref={light} penumbra={0} distance={60} angle={3.5} attenuation={5} anglePower={4} intensity={2} color="red" position={[0, 5, 1.5]} depthBuffer={depthBuffer} /> */}
@@ -166,3 +170,28 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
     </group >
   )
 }))
+
+
+function Puffycloud({ seed, vec = new Vector3(), ...props }) {
+  const api = useRef()
+  const light = useRef()
+  // const rig = useContext(context)
+    const [flash] = useState(() => new random.FlashGen({ count: 10, minDuration: 40, maxDuration: 200 }))
+  // const contact = (payload) => payload.other.rigidBodyObject.userData?.cloud && payload.totalForceMagnitude / 1000 > 100 && flash.burst()
+  useFrame((state, delta) => {
+    const impulse = flash.update(state.clock.elapsedTime, delta)
+    light.current.intensity = impulse * 15
+    // if (impulse === 1) rig?.current?.setIntensity(1)
+    // api.current?.applyImpulse(vec.copy(api.current.translation()).negate().multiplyScalar(10))
+  })
+  return (
+    <Clouds position={[0, 10, -8]}>
+      {/* <RigidBody ref={api} userData={{ cloud: true }} onContactForce={contact} linearDamping={4} angularDamping={1} friction={0.1} {...props} colliders={false}> */}
+      {/* <BallCollider args={[4]} /> */}
+      <Cloud seed={seed} fade={1} speed={0.1} growth={4} segments={40} volume={6} opacity={0.6} bounds={[4, 3, 1]} />
+      <Cloud seed={seed + 1} fade={1} position={[0, 1, 0]} speed={0.5} growth={4} volume={10} opacity={1} bounds={[6, 2, 1]} />
+      <pointLight position={[0, 0, 0.5]} ref={light} color="orange" />
+      {/* </RigidBody> */}
+    </Clouds>
+  )
+}
