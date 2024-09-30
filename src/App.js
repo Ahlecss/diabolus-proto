@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { CubeCamera, Environment, Reflector, ScrollControls, useAspect, useBoxProjectedEnv, useScroll, useTexture } from '@react-three/drei'
+import { CubeCamera, Environment, OrbitControls, Reflector, ScrollControls, useAspect, useBoxProjectedEnv, useScroll, useTexture } from '@react-three/drei'
 
 import { Overlay } from './Overlay.js'
 import { Frames } from './Frames.js'
@@ -13,8 +13,8 @@ import { useEffect } from 'react'
 import { useDrag, useGesture } from '@use-gesture/react'
 import { vitrauxData } from './vitrauxData.js'
 
-import floo from "./images/SurfaceImperfections003_1K_var1.jpg"
-import norma from "./images/SurfaceImperfections003_1K_Normal.jpg"
+import floo from "./images/roughness.jpg"
+import norma from "./images/normal.png"
 
 const GOLDENRATIO = 1.61803398875
 
@@ -24,7 +24,7 @@ export const App = ({ vitraux }) => {
   return (
     <>
       <Overlay />
-      <Canvas shadows dpr={[1, 1.5]} camera={{ near: 1, fov: 60, position: [0, 2, 15] }}>
+      <Canvas shadows dpr={[1, 1.5]} camera={{ near: 0.1, fov: 60, position: [0, 2, 15] }}>
         <ambientLight intensity={0.5} />
         {/* <color attach="background" args={['#191920']} /> */}
         <fog attach="fog" args={['black', 10, 25]} />
@@ -128,9 +128,13 @@ const ScrollWrapper = ({ vitraux }) => {
       {/* {focusId && <ScrollVertical groupRef={groupRef} />} */}
 
       
-      <Reflector ref={refreflector} resolution={512} args={[50, 50]} mirror={0.5} mixBlur={10} mixStrength={0.7} rotation={[-Math.PI / 2, 0, Math.PI / 2]} blur={[400, 100]} position={[0, -7, 0]}>
-        {(Material, props) => <Material color="#aaa" metalness={0.8} roughnessMap={floor} normalMap={normal} normalScale={[1, 1]} {...props} />}
+      <Reflector ref={refreflector} resolution={512} args={[50, 50]} mirror={0.5} mixBlur={4} mixStrength={5} rotation={[-Math.PI / 2, 0, Math.PI / 2]} blur={[100, 100]} position={[0, -7, 0]}>
+        {(Material, props) => <Material color="#999" metalness={0.4} roughnessMap={floor} normalMap={normal} normalScale={[0.1, 0.1]} {...props} />}
       </Reflector>
+
+      {/* <Reflector ref={refreflector} resolution={512} args={[50, 50]} mirror={0.4} mixBlur={4} mixStrength={5} rotation={[-Math.PI / 2, 0, Math.PI / 2]} blur={[100, 100]} position={[0, -7, 0]}>
+        {(Material, props) => <Material color="#888" metalness={0.6} roughnessMap={floor} normalMap={normal} normalScale={[0.1, 0.1]} {...props} />}
+      </Reflector> */}
     </group>
 
   )

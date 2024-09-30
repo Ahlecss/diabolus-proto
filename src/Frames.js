@@ -6,7 +6,7 @@ import { cubic, circ } from 'maath/easing'
 import { easing } from 'maath'
 import gsap, { Cubic, Power3 } from 'gsap'
 
-import { EffectComposer, GodRays, Bloom, SSR } from '@react-three/postprocessing'
+import { EffectComposer, GodRays, Bloom, SSR, N8AO, SMAA } from '@react-three/postprocessing'
 import { useFrame, useThree } from '@react-three/fiber'
 
 import { lerp } from './utils.js'
@@ -240,6 +240,8 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
             {hovered < 8 && <GodRays ref={god} sun={itemsRef.current[hovered]} density={0.4} weight={0.4} exposure={0.4} decay={0.8} blur />}
             <Bloom luminanceThreshold={0} mipmapBlur luminanceSmoothing={0.0} intensity={0.3} />
             {/* <SSR /> */}
+            {/* <N8AO halfRes color="red" aoRadius={2} intensity={1} aoSamples={6} denoiseSamples={4} />
+            <SMAA /> */}
           </EffectComposer>
         )
       }
