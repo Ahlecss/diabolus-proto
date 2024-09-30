@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Environment, ScrollControls, useAspect, useScroll } from '@react-three/drei'
+import { CubeCamera, Environment, Reflector, ScrollControls, useAspect, useBoxProjectedEnv, useScroll, useTexture } from '@react-three/drei'
 
 import { Overlay } from './Overlay.js'
 import { Frames } from './Frames.js'
@@ -13,6 +13,9 @@ import { useEffect } from 'react'
 import { useDrag, useGesture } from '@use-gesture/react'
 import { vitrauxData } from './vitrauxData.js'
 
+import floo from "./images/SurfaceImperfections003_1K_var1.jpg"
+import norma from "./images/SurfaceImperfections003_1K_Normal.jpg"
+
 const GOLDENRATIO = 1.61803398875
 
 
@@ -21,10 +24,10 @@ export const App = ({ vitraux }) => {
   return (
     <>
       <Overlay />
-      <Canvas shadows dpr={[1, 1.5]} camera={{ fov: 70, position: [0, 2, 15] }}>
+      <Canvas shadows dpr={[1, 1.5]} camera={{ near: 1, fov: 60, position: [0, 2, 15] }}>
         <ambientLight intensity={0.5} />
         {/* <color attach="background" args={['#191920']} /> */}
-        {/* <fog attach="fog" args={['#191920', 0, 15 * 2]} /> */}
+        <fog attach="fog" args={['black', 10, 25]} />
         <color attach="background" args={['#000']} />
         {/* <OrbitControls enablePan={false} enableZoom={false} minPolarAngle={Math.PI / 2.2} maxPolarAngle={Math.PI / 2.2} /> */}
 
@@ -36,7 +39,9 @@ export const App = ({ vitraux }) => {
           {/* <ScrollControls enabled={focusId !== null} pages={focusId === null ? 0 : 1.45} damping={0.1}> */}
           <ScrollWrap vitraux={vitraux} />
         </group>
-        <Environment preset="city" />
+        {/* <Environment preset="city" /> */}
+
+        {/* <Environment files="https://vazxmixjsiawhamofees.supabase.co/storage/v1/object/public/hdris/noon-grass/noon_grass_1k.hdr" background/> */}
         {/* <mesh receiveShadow position={[0, -10, 0]} rotation-x={-Math.PI / 2}>
           <planeGeometry args={[50, 50]} />
           <meshPhongMaterial />
@@ -96,6 +101,7 @@ const ScrollWrapper = ({ vitraux }) => {
   const size = useAspect(1800, 1000)
 
   const groupRef = useRef()
+  const refreflector = useRef()
 
   const { setFramesRef } = useFramesStore(
     useShallow((state) => ({ setFramesRef: state.setFramesRef })),
@@ -103,7 +109,11 @@ const ScrollWrapper = ({ vitraux }) => {
 
   useEffect(() => {
     setFramesRef(groupRef)
+    console.log(refreflector)
   }, [])
+
+  const [floor, normal] = useTexture([floo, norma])
+
 
   return (
     <group ref={groupRef}>
@@ -116,6 +126,11 @@ const ScrollWrapper = ({ vitraux }) => {
         </Sphere>
       </mesh> */}
       {/* {focusId && <ScrollVertical groupRef={groupRef} />} */}
+
+      
+      <Reflector ref={refreflector} resolution={512} args={[50, 50]} mirror={0.5} mixBlur={10} mixStrength={0.7} rotation={[-Math.PI / 2, 0, Math.PI / 2]} blur={[400, 100]} position={[0, -7, 0]}>
+        {(Material, props) => <Material color="#aaa" metalness={0.8} roughnessMap={floor} normalMap={normal} normalScale={[1, 1]} {...props} />}
+      </Reflector>
     </group>
 
   )

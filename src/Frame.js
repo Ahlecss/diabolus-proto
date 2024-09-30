@@ -5,7 +5,7 @@ import { easing } from "maath"
 import { cubic } from "maath/easing"
 import { DoubleSide, MeshBasicMaterial, SRGBColorSpace } from "three"
 
-import { Cloud, Clouds, Float, Scroll, ScrollControls, shaderMaterial, useCursor, useDepthBuffer, useTexture } from "@react-three/drei"
+import { Cloud, Clouds, CubeCamera, Float, Scroll, ScrollControls, shaderMaterial, useBoxProjectedEnv, useCursor, useDepthBuffer, useTexture } from "@react-three/drei"
 import { extend, useFrame, useThree } from "@react-three/fiber"
 import { useGesture, useDrag } from '@use-gesture/react'
 
@@ -58,6 +58,7 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
 
   const shaderRef = useRef()
   const cloudRef = useRef()
+  const projection = useRef()
   const hovered = useRef(false)
   const isActive = params?.id === name
 
@@ -75,6 +76,7 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
   const { changeHoverId, changeFocusId, invisible, focusId } = useFramesStore(
     useShallow((state) => ({ changeHoverId: state.changeHoverId, changeFocusId: state.changeFocusId, invisible: state.invisible, focusId: state.focusId })),
   )
+
 
   console.log('rerender', focusId)
 
@@ -105,14 +107,14 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
     shaderRef.current.uniforms.time.value += 1
     // console.log(shaderRef.current)
     easing.damp(shaderRef.current, 'opac', invisible ? 1 : 0, cubic.inOut(0.4), dt)
-    easing.damp3(vitrail.current.children[0].scale, (!isActive && hovered.current ? 1.1 : 1), cubic.inOut(0.4), dt)
+    // easing.damp3(vitrail.current.children[0].scale, (!isActive && hovered.current ? 1.1 : 1), cubic.inOut(0.4), dt)
   })
   return (
     <group
       position={[
-        12 * Math.sin(2 * Math.PI * ((i + 1) / length)),
-        0,
-        0 + 12 * -Math.cos(2 * Math.PI * ((i + 1) / length))]}
+        15 * Math.sin(2 * Math.PI * ((i + 1) / length)),
+        2,
+        0 + 15 * -Math.cos(2 * Math.PI * ((i + 1) / length))]}
       rotation={[0,
         -2 * Math.PI * ((i + 1) / length),
         0]}>
@@ -135,28 +137,28 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
           onPointerOut={(e) => pointerEvent(e, false)}
         >
           <planeBufferGeometry attach="geometry" args={[3.1 * 1.3 * (type === 'simple' ? 1 : 3), 10 * 1.3, 100, 100]} />
-          <imageFadeMaterial ref={shaderRef} attach="material" tex1={tex1} tex2={tex2} transparent={true} colorSpace={SRGBColorSpace} side={DoubleSide} />
+          <imageFadeMaterial ref={shaderRef} attach="material" tex1={tex1} tex2={tex2} transparent={true} colorSpace={SRGBColorSpace} toneMapped={false} /*side={DoubleSide}*/ />
         </mesh>
 
       </group>
-      <Clouds>
+      {/* <Clouds>
         <Float
           speed={1} // Animation speed, defaults to 1
-          rotationIntensity={3} // XYZ rotation intensity, defaults to 1
+          rotationIntensity={0} // XYZ rotation intensity, defaults to 1
           floatIntensity={1} // Up/down float intensity, works like a multiplier with floatingRange,defaults to 1
-          floatingRange={[-13, -14]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
+          floatingRange={[13, 14]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
         >
-          <Cloud layers={0} ref={cloudRef} color={'#aaa'} bounds={[6, 5, 5]} concentrate="outside" seed={2} position={[0, 0, 0]} segments={10} volume={10} fade={0} growth={4} speed={1} opacity={Math.random()} />
+          <Cloud layers={0} ref={cloudRef} color={'#ccc'} bounds={[6, 5, 5]} concentrate="outside" seed={2} position={[0, 0, 0]} segments={10} volume={10} fade={0} growth={4} speed={1} opacity={Math.random()} />
         </Float>
         <Float
           speed={1} // Animation speed, defaults to 1
-          rotationIntensity={5} // XYZ rotation intensity, defaults to 1
+          rotationIntensity={0} // XYZ rotation intensity, defaults to 1
           floatIntensity={0.6} // Up/down float intensity, works like a multiplier with floatingRange,defaults to 1
-          floatingRange={[-12, -13]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
+          floatingRange={[12, 13]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
         >
-          <Cloud layers={0} ref={cloudRef} color={'#aaa'} bounds={[6, 5, 5]} concentrate="outside" seed={3} position={[0, 0, 0]} segments={10} volume={10} fade={0} growth={4} speed={1} opacity={Math.random()} />
+          <Cloud layers={0} ref={cloudRef} color={'#bbb'} bounds={[6, 5, 5]} concentrate="outside" seed={3} position={[0, 0, 0]} segments={10} volume={10} fade={0} growth={4} speed={1} opacity={Math.random()} />
         </Float>
-      </Clouds>
+      </Clouds> */}
 
 
       {/* <SpotLight castShadow ref={light} penumbra={0} distance={60} angle={3.5} attenuation={5} anglePower={4} intensity={2} color="red" position={[0, 5, 1.5]} depthBuffer={depthBuffer} /> */}

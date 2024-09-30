@@ -13,16 +13,25 @@ import { lerp } from './utils.js'
 import { Frame } from "./Frame"
 import { CameraRotate } from './CameraRotate.js'
 import { Gyro } from './Gyro.js'
+import { CubeCamera, Reflector, useTexture, useBoxProjectedEnv, useCubeCamera, MeshReflectorMaterial, useDetectGPU } from '@react-three/drei'
+import floo from "./images/SurfaceImperfections003_1K_var1.jpg"
+import norma from "./images/SurfaceImperfections003_1K_Normal.jpg"
+
 
 export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }) => {
   const ref = useRef([])
   const clicked = useRef()
   const god = useRef()
+  const cubeRef = useRef()
+  const cubeCamRef = useRef()
   const [hovered, setHovered] = useState(0)
   const itemsRef = useRef([]);
   const [, params] = useRoute('/item/:id')
   const [, setLocation] = useLocation()
   const camera = useThree((state) => state.camera)
+  const GPUTier = useDetectGPU()
+
+  console.log(GPUTier)
 
   const groupXTo = gsap.quickTo(ref.current.position, 'x', { duration: 0.1, ease: Power3.easeOut });
   const groupYTo = gsap.quickTo(ref.current.position, 'y', { duration: 0.1, ease: Power3.easeOut });
@@ -148,8 +157,15 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
 
   const handleGodrays = useCallback(change, [setHovered])
 
+  const [floor, normal] = useTexture([floo, norma])
+
+
   useFrame((state, dt) => {
-    // ref.current.rotation.y += 0.01
+    // cubeRef.current.material.envMap.rotation += 0.1;
+    // console.log(cubeRef.current.material.envMap)
+    // cubeRef.current.rotation.z += 0.01
+
+    // camcube.rotation.y += 0.01
     // if (!active && data) data.el.scrollTop = lerp(data.el.scrollTop, 0, 0.1)
 
     if (god.current && god.current.blendMode && clicked.current) {
@@ -180,6 +196,41 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
         onPointerMissed={() => (setLocation('/'), setHovered(undefined))}>
         {vitraux.map((props, i) => <Frame key={i} i={i} handleGodrays={handleGodrays} {...props} length={vitraux.length} ref={itemsRef} /> /* prettier-ignore */)}
       </group>
+
+
+      {/* <CubeCamera resolution={1024}>
+        {(texture) => (
+          <mesh>
+            <sphereGeometry/>
+            <meshLambertMaterial envMap={texture}/>
+          </mesh>
+        )}
+      </CubeCamera> */}
+
+      {/* <mesh position={[0, -1.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[50, 50]} />
+        <MeshReflectorMaterial
+          blur={[400, 100]}
+          resolution={1024}
+          mixBlur={1}
+          mixStrength={15}
+          depthScale={1}
+          minDepthThreshold={0.85}
+          color="#151515"
+          metalness={0.6}
+          roughness={1}
+        />
+      </mesh> */}
+      {/* <group>
+        <CubeCamera resolution={1024} frames={2} position={[0, -7, 0]} ref={cubeCamRef}>
+          {(texture) => (
+            <mesh rotation={[-Math.PI / 2, 0, 0]} ref={cubeRef}>
+              <planeGeometry args={[30, 30]} position={[0, -7, 0]}/>
+              <meshLambertMaterial envMap={texture} />
+            </mesh>
+          )}
+        </CubeCamera>
+      </group> */}
 
       {isMobile && <Gyro isActive={clicked.current} />}
       {!isMobile && <CameraRotate />}
