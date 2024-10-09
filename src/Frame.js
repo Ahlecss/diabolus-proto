@@ -166,7 +166,7 @@ const Model = (props) => {
 
   const ImageFadeMaterial = useRef(new ShaderMaterial({
     uniforms: {
-      tex1: { value: atlasTexture },
+      tex1: { value: tex1 },
       tex2: { value: tex2 },
       opac: 0,
       time: 0
