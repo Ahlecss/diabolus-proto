@@ -13,6 +13,7 @@ import { useEffect } from 'react'
 import { useDrag, useGesture } from '@use-gesture/react'
 import { vitrauxData } from './vitrauxData.js'
 import { Vector3 } from 'three'
+import { Puffycloud } from './Clouds.js'
 
 const GOLDENRATIO = 1.61803398875
 
@@ -22,9 +23,9 @@ export const App = ({ vitraux }) => {
     <>
       <Overlay />
       <Canvas shadows dpr={[1, 1.5]} camera={{ near: 0.1, fov: 60, position: [0, 2, 15] }}>
-      <ambientLight intensity={Math.PI / 2} />
+        <ambientLight intensity={Math.PI / 2} />
         {/* <color attach="background" args={['#191920']} /> */}
-        <fog attach="fog" args={['black', 10, 25]} />
+        <fog attach="fog" args={['black', 10, 30]} />
         <color attach="background" args={['#000']} />
         {/* <OrbitControls enablePan={false} enableZoom={false} minPolarAngle={Math.PI / 2.2} maxPolarAngle={Math.PI / 2.2} /> */}
 
@@ -44,6 +45,7 @@ export const App = ({ vitraux }) => {
           <planeGeometry args={[50, 50]} />
           <meshPhongMaterial />
         </mesh> */}
+
       </Canvas>
     </>
   )

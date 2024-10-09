@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback, memo } from 'react'
 import { useRoute, useLocation } from 'wouter'
 import { isMobile } from 'react-device-detect'
-import { Quaternion, Vector3 } from "three"
+import { BackSide, DoubleSide, Quaternion, SpotLightHelper, Vector3 } from "three"
 import { cubic, circ } from 'maath/easing'
 import { easing, random } from 'maath'
 import gsap, { Cubic, Power3 } from 'gsap'
@@ -10,10 +10,11 @@ import { EffectComposer, GodRays, Bloom, SSR, N8AO, SMAA } from '@react-three/po
 import { useFrame, useThree } from '@react-three/fiber'
 
 import { lerp } from './utils.js'
+import { Puffycloud } from './Clouds.js'
 import { Frame } from "./Frame"
 import { CameraRotate } from './CameraRotate.js'
 import { Gyro } from './Gyro.js'
-import { CubeCamera, Reflector, useTexture, useBoxProjectedEnv, useCubeCamera, MeshReflectorMaterial, useDetectGPU, Clouds, Cloud } from '@react-three/drei'
+import { CubeCamera, Reflector, useTexture, useBoxProjectedEnv, useCubeCamera, MeshReflectorMaterial, useDetectGPU, Clouds, Cloud, useHelper } from '@react-three/drei'
 
 import rou from "./images/rough.jpg"
 import floo from "./images/roughness.jpg"
@@ -21,6 +22,12 @@ import norma from "./images/normal.png"
 import opa from "./images/opacity.jpg"
 import bum from "./images/bump.jpg"
 import { RepeatWrapping } from 'three'
+
+import cloudImg from './images/clouds.jpg'
+
+import { useLoader } from '@react-three/fiber'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+
 
 
 export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }) => {
@@ -38,6 +45,8 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
 
   console.log(GPUTier)
 
+  const light = useRef()
+
   const groupXTo = gsap.quickTo(ref.current.position, 'x', { duration: 0.1, ease: Power3.easeOut });
   const groupYTo = gsap.quickTo(ref.current.position, 'y', { duration: 0.1, ease: Power3.easeOut });
   const groupZTo = gsap.quickTo(ref.current.position, 'z', { duration: 0.1, ease: Power3.easeOut });
@@ -53,6 +62,9 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
   let startY = 0;
   let offsetX = 0;
   let offsetY = 0;
+
+  const texture1 = useTexture(cloudImg);
+
 
   // Use Drag mobile in a specific component ? With clicked current as a props
   const onMouseDown = (e) => {
@@ -165,10 +177,15 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
   const [rough, normal, opacity, bump] = useTexture([rou, norma, opa, bum])
 
 
-  console.log(normal)
+  // light.current.target.position.y = -14
+
+  useHelper(light.current, SpotLightHelper, 'cyan')
+
 
   normal.repeat.set(20, 20)
   normal.wrapS = normal.wrapT = RepeatWrapping;
+
+  const [flash] = useState(() => new random.FlashGen({ count: 10, minDuration: 40, maxDuration: 200, maxInterval: 100 }))
 
 
   useFrame((state, dt) => {
@@ -176,8 +193,21 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
     // console.log(cubeRef.current.material.envMap)
     // cubeRef.current.rotation.z += 0.01
 
+    // light.current.position.z = Math.sin(state.clock.elapsedTime)
+
+
     // camcube.rotation.y += 0.01
     // if (!active && data) data.el.scrollTop = lerp(data.el.scrollTop, 0, 0.1)
+
+    const impulse = flash.update(state.clock.elapsedTime, dt)
+    light.current.intensity = impulse * Math.random() * 200
+    light.current.position.x = impulse * Math.random() * 8 + 5
+    light.current.position.y = impulse * Math.random() * 8 + 5
+
+
+    cloudPlanes.forEach((cloud, i) => {
+      cloudRef[i].rotation.z -= 0.0004;
+    })
 
     if (god.current && god.current.blendMode && clicked.current) {
       god.current.blendMode.opacity.value = lerp(god.current.blendMode.opacity.value, 0.1, cubic.inOut(0.7))
@@ -196,6 +226,24 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
       easing.dampQ(state.camera.quaternion, q, circ.inOut(0.6), dt)
     }
   })
+  let cloudPlanes = []
+  let cloudRef = []
+
+  for (let i = 0; i < 1; i++) {
+    cloudPlanes.push(
+      <mesh ref={el => cloudRef[i] = el}
+        position={[-0, -0, 0]}
+      // position={[-5,-35,20]}
+      >
+        <planeGeometry args={[70, 70]} />
+        {/* <sphereGeometry args={[50, 32, 24]} /> */}
+        <meshLambertMaterial map={texture1} transparent renderOrder={0} opacity={0.5} side={DoubleSide} fog={true} />
+      </mesh >
+    )
+  }
+
+  // texture1.repeat.set(4.5, 3)
+  texture1.wrapS = texture1.wrapT = RepeatWrapping;
 
   return (
     <>
@@ -208,10 +256,20 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
         {vitraux.map((props, i) => <Frame key={i} i={i} handleGodrays={handleGodrays} {...props} length={vitraux.length} ref={itemsRef} /> /* prettier-ignore */)}
       </group>
 
-      <Reflector resolution={512} args={[50, 50]} mirror={0.5} mixBlur={4} mixStrength={5} rotation={[-Math.PI / 2, 0, Math.PI / 2]} blur={[100, 100]} position={[0, -7, 0]}>
-        {(Material, props) =><Material color="#999" metalness={0.6} roughnessMap={rough} normalMap={normal} {...props} transparent={false} />
+      <Reflector resolution={512} args={[60, 60]} mirror={0.5} mixBlur={4} mixStrength={5} rotation={[-Math.PI / 2, 0, Math.PI / 2]} blur={[100, 100]} position={[0, -7, 0]}>
+        {(Material, props) => <Material color="#999" metalness={0.9} roughnessMap={rough} normalMap={normal} {...props} transparent={false} />
         }
       </Reflector>
+
+      <group position={[0, 0, -20]}>
+        {cloudPlanes}
+        <pointLight ref={light} args={['white', 100, 20, 2]} position={[10, 10, 3]} />
+      </group>
+
+
+      {/* <spotLight ref={light} color={'orange'} position={[0, 0, -15]} intensity={10} />
+      {light.current && <primitive object={light.current.target} position={[0, 0, -20]} />} */}
+
 
       {/* <CubeCamera resolution={1024}>
         {(texture) => (
@@ -252,7 +310,7 @@ export const Frames = memo(({ vitraux, q = new Quaternion(), p = new Vector3() }
       {
         itemsRef.current[0] && (
           <EffectComposer disableNormalPass multisampling={0}>
-            {hovered < 8 && <GodRays ref={god} sun={itemsRef.current[hovered]} density={0.4 /* 0.8 */} weight={0.4} exposure={0.4} decay={0.8} blur />}
+            {hovered < 8 && <GodRays ref={god} sun={itemsRef.current[hovered]} density={0.4 /* 0.8*/} weight={0.4} exposure={0.4} decay={0.8} blur />}
             <Bloom luminanceThreshold={0} mipmapBlur luminanceSmoothing={0.0} intensity={0.3} />
             {/* <SSR /> */}
             {/* <N8AO halfRes color="red" aoRadius={2} intensity={1} aoSamples={6} denoiseSamples={4} />
