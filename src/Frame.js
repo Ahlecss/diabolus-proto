@@ -1,4 +1,4 @@
-import { forwardRef, memo, useEffect, useRef, useState } from "react"
+import { forwardRef, memo, useEffect, useMemo, useRef, useState } from "react"
 import getUuidByString from "uuid-by-string"
 import { useRoute } from "wouter"
 import { easing, random } from "maath"
@@ -18,7 +18,7 @@ import atlas from "./images/AtlasFinal.png"
 export const Frame = memo(forwardRef((props, itemsRef) => {
   const { url, texture1, texture2, type, ratios, i, idd, length } = props
 
-  const vitrail = useRef()
+  const vitrailRef = useRef()
   // const frame = useRef()
   // Old Route way
   const [, params] = useRoute('/item/:id')
@@ -66,14 +66,14 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
   useCursor(hovered.current)
   useFrame((state, dt) => {
     // console.log(idd, invisible.current)
-    // console.log(vitrail.current.children[0])
+    // console.log(vitrailRefcurrent.children[0])
     // cloudRef.current.rotation.y -= dt * 0.1
     // cloudRef.current.rotation.x -= dt * 0.14
     // if(shaderRef.current.material.uniforms.time) shaderRef.current.material.uniforms.time.value += 1
     // console.log(shaderRef.current.material.uniforms)
     // console.log(shaderRef.current)
     // easing.damp(shaderRef.current.material.uniforms, 'opac', Math.sin(state.clock.elapsedTime), cubic.inOut(0.4), dt)
-    // easing.damp3(vitrail.current.children[0].scale, (!isActive && hovered.current ? 1.1 : 1), cubic.inOut(0.4), dt)
+    // easing.damp3(vitrailRef.current.children[0].scale, (!isActive && hovered.current ? 1.1 : 1), cubic.inOut(0.4), dt)
   })
   return (
     <group
@@ -90,7 +90,7 @@ export const Frame = memo(forwardRef((props, itemsRef) => {
             <meshBasicMaterial toneMapped={false} fog={false} />
           </mesh> */}
       {/* <Scroll> */}
-      <group ref={vitrail} >
+      <group ref={vitrailRef} >
         <mesh receiveShadow position={[0, 0, 0]}
           ref={el => itemsRef.current[i] = el}
           key={i}
@@ -158,18 +158,20 @@ const Model = (props) => {
     // cloudRef.current.rotation.y -= dt * 0.1
     // cloudRef.current.rotation.x -= dt * 0.14
     // if (shaderRef.current.material.uniforms.time) shaderRef.current.material.uniforms.uniforms.time.value += 1
-    // console.log(shaderRef.current.material.uniforms)
-    // console.log(shaderRef.current.material.uniforms)
-    easing.damp(shaderRef.current.material.uniforms, 'opac', Math.sin(state.clock.elapsedTime), cubic.inOut(0.4), dt)
-    // easing.damp3(vitrail.current.children[0].scale, (!isActive && hovered.current ? 1.1 : 1), cubic.inOut(0.4), dt)
+
+    const elapsedTime = state.clock.getElapsedTime()
+    shaderRef.current.material.uniforms.opac.value = Math.sin(elapsedTime)
+    // Utilisation de maath.easing pour animer progressivement les changements
+    easing.damp(shaderRef.current.material.uniforms.opac, 'value', Math.sin(elapsedTime), cubic.inOut(0.4), dt)
+    // easing.damp3(vitrailRef.current.children[0].scale, (!isActive && hovered.current ? 1.1 : 1), cubic.inOut(0.4), dt)
   })
 
-  const ImageFadeMaterial = useRef(new ShaderMaterial({
+  const ImageFadeMaterial = useMemo(() => new ShaderMaterial({
     uniforms: {
       tex1: { value: materials.VitrailTriple_THRASHMETAL_Legendes.map },
       tex2: { value: tex2 },
-      opac: 0,
-      time: 0
+      opac: { value: 0 }, // Assure-toi que l'opacité est bien initialisée
+      time: { value: 0 }
     },
     vertexShader: ` varying vec2 vUv;
   
@@ -195,26 +197,26 @@ const Model = (props) => {
           #include <tonemapping_fragment>
             #include <encodings_fragment> 
       }`
-  }))
+  }), [])
 
   return (
     <group {...props} dispose={null} scale={[10, 10, 10]}>
-      <mesh geometry={nodes.Parent.geometry} ref={shaderRef} material={ImageFadeMaterial.current} rotation={[Math.PI / 2, 0, -Math.PI / 2]}>
+      <mesh geometry={nodes.Parent.geometry} ref={shaderRef} material={ImageFadeMaterial} rotation={[Math.PI / 2, 0, -Math.PI / 2]}>
 
-        <mesh geometry={nodes.Parent001.geometry} material={ImageFadeMaterial.current} />
-        <mesh geometry={nodes.Parent002.geometry} material={ImageFadeMaterial.current} />
-        <mesh geometry={nodes.Parent003.geometry} material={ImageFadeMaterial.current} />
-        <mesh geometry={nodes.Parent005.geometry} material={ImageFadeMaterial.current} />
-        <mesh geometry={nodes.Parent006.geometry} material={ImageFadeMaterial.current} />
-        <mesh geometry={nodes.Parent007.geometry} material={ImageFadeMaterial.current} />
-        <mesh geometry={nodes.Parent008.geometry} material={ImageFadeMaterial.current} />
-        <mesh geometry={nodes.Parent010.geometry} material={ImageFadeMaterial.current} />
-        <mesh geometry={nodes.Parent011.geometry} material={ImageFadeMaterial.current} />
-        <mesh geometry={nodes.Parent012.geometry} material={ImageFadeMaterial.current} />
-        <mesh geometry={nodes.Parent013.geometry} material={ImageFadeMaterial.current} />
-        <mesh geometry={nodes.Parent014.geometry} material={ImageFadeMaterial.current} />
-        <mesh geometry={nodes.Plan1.geometry} material={ImageFadeMaterial.current} onPointerOver={(e) => e.object.position.z = 0.1} />
-        <mesh geometry={nodes.Plan2.geometry} material={ImageFadeMaterial.current}/>
+        <mesh geometry={nodes.Parent001.geometry} material={ImageFadeMaterial} onPointerOver={(e) => e.object.position.y = 0.1} onPointerLeave={(e) => e.object.position.y = 0} />
+        <mesh geometry={nodes.Parent002.geometry} material={ImageFadeMaterial} onPointerOver={(e) => e.object.position.y = 0.1} onPointerLeave={(e) => e.object.position.y = 0} />
+        <mesh geometry={nodes.Parent003.geometry} material={ImageFadeMaterial} onPointerOver={(e) => e.object.position.y = 0.1} onPointerLeave={(e) => e.object.position.y = 0} />
+        <mesh geometry={nodes.Parent005.geometry} material={ImageFadeMaterial} onPointerOver={(e) => e.object.position.y = 0.1} onPointerLeave={(e) => e.object.position.y = 0} />
+        <mesh geometry={nodes.Parent006.geometry} material={ImageFadeMaterial} onPointerOver={(e) => e.object.position.y = 0.1} onPointerLeave={(e) => e.object.position.y = 0} />
+        <mesh geometry={nodes.Parent007.geometry} material={ImageFadeMaterial} onPointerOver={(e) => e.object.position.y = 0.1} onPointerLeave={(e) => e.object.position.y = 0} />
+        <mesh geometry={nodes.Parent008.geometry} material={ImageFadeMaterial} onPointerOver={(e) => e.object.position.y = 0.1} onPointerLeave={(e) => e.object.position.y = 0} />
+        <mesh geometry={nodes.Parent010.geometry} material={ImageFadeMaterial} onPointerOver={(e) => e.object.position.y = 0.1} onPointerLeave={(e) => e.object.position.y = 0} />
+        <mesh geometry={nodes.Parent011.geometry} material={ImageFadeMaterial} onPointerOver={(e) => e.object.position.y = 0.1} onPointerLeave={(e) => e.object.position.y = 0} />
+        <mesh geometry={nodes.Parent012.geometry} material={ImageFadeMaterial} onPointerOver={(e) => e.object.position.y = 0.1} onPointerLeave={(e) => e.object.position.y = 0} />
+        <mesh geometry={nodes.Parent013.geometry} material={ImageFadeMaterial} onPointerOver={(e) => e.object.position.y = 0.1} onPointerLeave={(e) => e.object.position.y = 0} />
+        <mesh geometry={nodes.Parent014.geometry} material={ImageFadeMaterial} onPointerOver={(e) => e.object.position.y = 0.1} onPointerLeave={(e) => e.object.position.y = 0} />
+        <mesh geometry={nodes.Plan1.geometry} material={ImageFadeMaterial} onPointerOver={(e) => e.object.position.y = 0.1} onPointerLeave={(e) => e.object.position.y = 0}/>
+        <mesh geometry={nodes.Plan2.geometry} material={ImageFadeMaterial}/>
       </mesh>
     </group>
 
