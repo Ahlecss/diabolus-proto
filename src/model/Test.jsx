@@ -11,6 +11,18 @@ export function Model(props) {
   return (
     <group {...props} dispose={null}>
       <mesh geometry={nodes.Parent.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} rotation={[Math.PI / 2, 0, -Math.PI / 2]}>
+        <mesh geometry={nodes.Parent001.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} />
+        <mesh geometry={nodes.Parent002.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} />
+        <mesh geometry={nodes.Parent003.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} />
+        <mesh geometry={nodes.Parent005.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} />
+        <mesh geometry={nodes.Parent006.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} />
+        <mesh geometry={nodes.Parent007.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} />
+        <mesh geometry={nodes.Parent008.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} />
+        <mesh geometry={nodes.Parent010.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} />
+        <mesh geometry={nodes.Parent011.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} />
+        <mesh geometry={nodes.Parent012.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} />
+        <mesh geometry={nodes.Parent013.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} />
+        <mesh geometry={nodes.Parent014.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} />
         <mesh geometry={nodes.Plan1.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} />
         <mesh geometry={nodes.Plan2.geometry} material={materials.VitrailTriple_THRASHMETAL_Legendes} />
       </mesh>

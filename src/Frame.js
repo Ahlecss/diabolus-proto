@@ -166,7 +166,7 @@ const Model = (props) => {
 
   const ImageFadeMaterial = useRef(new ShaderMaterial({
     uniforms: {
-      tex1: { value: tex1 },
+      tex1: { value: materials.VitrailTriple_THRASHMETAL_Legendes.map },
       tex2: { value: tex2 },
       opac: 0,
       time: 0
@@ -200,6 +200,19 @@ const Model = (props) => {
   return (
     <group {...props} dispose={null} scale={[10, 10, 10]}>
       <mesh geometry={nodes.Parent.geometry} ref={shaderRef} material={ImageFadeMaterial.current} rotation={[Math.PI / 2, 0, -Math.PI / 2]}>
+
+        <mesh geometry={nodes.Parent001.geometry} material={ImageFadeMaterial.current} />
+        <mesh geometry={nodes.Parent002.geometry} material={ImageFadeMaterial.current} />
+        <mesh geometry={nodes.Parent003.geometry} material={ImageFadeMaterial.current} />
+        <mesh geometry={nodes.Parent005.geometry} material={ImageFadeMaterial.current} />
+        <mesh geometry={nodes.Parent006.geometry} material={ImageFadeMaterial.current} />
+        <mesh geometry={nodes.Parent007.geometry} material={ImageFadeMaterial.current} />
+        <mesh geometry={nodes.Parent008.geometry} material={ImageFadeMaterial.current} />
+        <mesh geometry={nodes.Parent010.geometry} material={ImageFadeMaterial.current} />
+        <mesh geometry={nodes.Parent011.geometry} material={ImageFadeMaterial.current} />
+        <mesh geometry={nodes.Parent012.geometry} material={ImageFadeMaterial.current} />
+        <mesh geometry={nodes.Parent013.geometry} material={ImageFadeMaterial.current} />
+        <mesh geometry={nodes.Parent014.geometry} material={ImageFadeMaterial.current} />
         <mesh geometry={nodes.Plan1.geometry} material={ImageFadeMaterial.current} onPointerOver={(e) => e.object.position.z = 0.1} />
         <mesh geometry={nodes.Plan2.geometry} material={ImageFadeMaterial.current}/>
       </mesh>
